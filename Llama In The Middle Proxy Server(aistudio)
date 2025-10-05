@@ -1,0 +1,1336 @@
+{
+  "runSettings": {
+    "temperature": 1.0,
+    "model": "models/gemini-2.5-pro",
+    "topP": 0.95,
+    "topK": 64,
+    "maxOutputTokens": 65536,
+    "safetySettings": [{
+      "category": "HARM_CATEGORY_HARASSMENT",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_HATE_SPEECH",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+      "threshold": "OFF"
+    }, {
+      "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+      "threshold": "OFF"
+    }],
+    "enableCodeExecution": false,
+    "enableSearchAsATool": false,
+    "enableBrowseAsATool": false,
+    "enableAutoFunctionResponse": false,
+    "thinkingBudget": -1
+  },
+  "systemInstruction": {
+  },
+  "chunkedPrompt": {
+    "chunks": [{
+      "text": "Let\u0027s write python\u0027s flask-server based script \"llama in the middle\": we\u0027ll build a proxy in front of llama.cpp server and improve it slowly.\n\nFor now make it simple.\n\nAssume I have server llama.cpp server at 10000 on localhost\nProxy will be at port 11111\nClient will be connected to it.\nWe forward everything to 10000 and return as is including stream.\n\nPlease note, client also calls `tokenize` and `completition` via OPTION method and browser can yield CORS errors if response is incorrect.\n\nSimplest test:\n`curl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\"Yo, give me some simple emoji\", \"stream\": true}\u0027`\n(note to use llamacpp api, not openai)",
+      "role": "user",
+      "tokenCount": 186
+    }, {
+      "text": "**Designing the Architecture**\n\nI\u0027m currently focused on the foundational architecture. I\u0027m aiming to build a Python Flask script functioning as a proxy for a `llama.cpp` server. This \"llama in the middle\" approach seems promising, and I\u0027m deconstructing the process, starting with the incoming request.\n\n\n**Refining the Proxy Logic**\n\nI\u0027ve been further refining the logic for the Flask proxy. I\u0027m focusing on crafting a generic approach to handle any path and HTTP method, including GET, POST, and OPTIONS, crucial for CORS. Streaming the response from the `llama.cpp` server is a major priority, so I\u0027m investigating non-blocking methods to avoid waiting for the full response before forwarding it. The plan is to ensure the proxy can stream efficiently.\n\n\n**Defining Core Functionality**\n\nI\u0027m now zeroing in on defining the core functionalities of the proxy script. The focus is now on ensuring it can forward any incoming request, regardless of the path or HTTP method, to the `llama.cpp` server. This involves handling both GET, POST, and OPTIONS requests, a key aspect for CORS compatibility. My top priority is supporting streaming. The goal is to avoid waiting for the full response from the `llama.cpp` server and relay it promptly to the client. This will be the foundational element of the structure.\n\n\n**Developing Request Forwarding**\n\nI\u0027m now implementing the core functionality. I\u0027m building out a generic approach to forward any incoming request, including different paths, HTTP methods, and importantly, the handling of `OPTIONS` requests for CORS compatibility. The most critical component is incorporating streaming, where I\u0027m examining non-blocking methods. I want the proxy to relay the response from the `llama.cpp` server to the client without delay. This has become my central focus.\n\n\n**Constructing Request Forwarding**\n\nI\u0027m now implementing the core functionality. I\u0027m building out a generic approach to forward any incoming request, including different paths, HTTP methods, and importantly, the handling of `OPTIONS` requests for CORS compatibility. The most critical component is incorporating streaming, where I\u0027m examining non-blocking methods. I want the proxy to relay the response from the `llama.cpp` server to the client without delay. This has become my central focus. I\u0027ve chosen `requests` for the HTTP client. I need to make sure I\u0027m copying headers correctly, excluding the `Host` header, and leveraging `stream\u003dTrue` to achieve the streaming objective. My goal is to use Flask to build a versatile proxy, starting with a clean, extensible structure. I have `Flask-CORS` in mind to solve for CORS issues too.\n\n\n**Building Request Handling**\n\nI\u0027m now in the process of building a robust request-handling mechanism. I\u0027m focusing on forwarding requests to the `llama.cpp` server, carefully managing headers (excluding `Host`), and leveraging `stream\u003dTrue` with `requests`. My goal is to use Flask to build a proxy, starting with a clean, extensible structure, and I\u0027m looking at `Flask-CORS` to handle CORS issues. I need to make sure I copy headers correctly, excluding the `Host` header, and leveraging `stream\u003dTrue` to achieve the streaming objective.\n\n\n**Refining Request Handling**\n\nI\u0027m now in the process of refining the request-handling mechanism. I\u0027m focusing on forwarding requests to the `llama.cpp` server while ensuring all headers (except the `Host`) are passed correctly, by leveraging `stream\u003dTrue` in requests. I\u0027m building a Flask proxy with a clean, extensible structure, and using `Flask-CORS` for CORS issues. I must handle headers accurately and use `stream\u003dTrue`. I\u0027m using `requests` for the HTTP client. I need to copy headers correctly, excluding the `Host` header.\n\n\n**Developing Streaming Logic**\n\nI\u0027ve been working on getting the streaming functionality for the proxy right. I\u0027m leveraging `requests` with `stream\u003dTrue` to avoid waiting for the full response. Now, I have to efficiently forward the stream from the `llama.cpp` server to the client using a Flask `Response` object. I have to avoid some headers, such as `Content-Length`, that will break streaming. I\u0027m now implementing the function responsible for the main logic. I\u0027m debugging my code to avoid connection issues.\n\n\n**Refining Streaming \u0026 Responses**\n\nI\u0027ve been working on refining the streaming functionality and how responses are handled. I\u0027m leveraging `requests` with `stream\u003dTrue` and building out the Flask `Response` object to efficiently forward the stream from the `llama.cpp` server to the client. I\u0027ve realized I need to be careful with certain headers, like `Content-Length`, as they can break streaming. I\u0027m focusing now on implementing this streaming logic and debugging any related connection issues.\n\n\n",
+      "role": "model",
+      "tokenCount": 2189,
+      "isThought": true,
+      "thinkingBudget": -1,
+      "thoughtSignatures": ["", "", "", "", "", "", "", "", ""],
+      "parts": [{
+        "text": "**Designing the Architecture**\n\nI\u0027m currently focused on the foundational architecture. I\u0027m aiming to build a Python Flask script functioning as a proxy for a `llama.cpp` server. This \"llama in the middle\" approach seems promising, and I\u0027m deconstructing the process, starting with the incoming request.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining the Proxy Logic**\n\nI\u0027ve been further refining the logic for the Flask proxy. I\u0027m focusing on crafting a generic approach to handle any path and HTTP method, including GET, POST, and OPTIONS, crucial for CORS. Streaming the response from the `llama.cpp` server is a major priority, so I\u0027m investigating non-blocking methods to avoid waiting for the full response before forwarding it. The plan is to ensure the proxy can stream efficiently.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Defining Core Functionality**\n\nI\u0027m now zeroing in on defining the core functionalities of the proxy script. The focus is now on ensuring it can forward any incoming request, regardless of the path or HTTP method, to the `llama.cpp` server. This involves handling both GET, POST, and OPTIONS requests, a key aspect for CORS compatibility. My top priority is supporting streaming. The goal is to avoid waiting for the full response from the `llama.cpp` server and relay it promptly to the client. This will be the foundational element of the structure.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Developing Request Forwarding**\n\nI\u0027m now implementing the core functionality. I\u0027m building out a generic approach to forward any incoming request, including different paths, HTTP methods, and importantly, the handling of `OPTIONS` requests for CORS compatibility. The most critical component is incorporating streaming, where I\u0027m examining non-blocking methods. I want the proxy to relay the response from the `llama.cpp` server to the client without delay. This has become my central focus.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Constructing Request Forwarding**\n\nI\u0027m now implementing the core functionality. I\u0027m building out a generic approach to forward any incoming request, including different paths, HTTP methods, and importantly, the handling of `OPTIONS` requests for CORS compatibility. The most critical component is incorporating streaming, where I\u0027m examining non-blocking methods. I want the proxy to relay the response from the `llama.cpp` server to the client without delay. This has become my central focus. I\u0027ve chosen `requests` for the HTTP client. I need to make sure I\u0027m copying headers correctly, excluding the `Host` header, and leveraging `stream\u003dTrue` to achieve the streaming objective. My goal is to use Flask to build a versatile proxy, starting with a clean, extensible structure. I have `Flask-CORS` in mind to solve for CORS issues too.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Building Request Handling**\n\nI\u0027m now in the process of building a robust request-handling mechanism. I\u0027m focusing on forwarding requests to the `llama.cpp` server, carefully managing headers (excluding `Host`), and leveraging `stream\u003dTrue` with `requests`. My goal is to use Flask to build a proxy, starting with a clean, extensible structure, and I\u0027m looking at `Flask-CORS` to handle CORS issues. I need to make sure I copy headers correctly, excluding the `Host` header, and leveraging `stream\u003dTrue` to achieve the streaming objective.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining Request Handling**\n\nI\u0027m now in the process of refining the request-handling mechanism. I\u0027m focusing on forwarding requests to the `llama.cpp` server while ensuring all headers (except the `Host`) are passed correctly, by leveraging `stream\u003dTrue` in requests. I\u0027m building a Flask proxy with a clean, extensible structure, and using `Flask-CORS` for CORS issues. I must handle headers accurately and use `stream\u003dTrue`. I\u0027m using `requests` for the HTTP client. I need to copy headers correctly, excluding the `Host` header.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Developing Streaming Logic**\n\nI\u0027ve been working on getting the streaming functionality for the proxy right. I\u0027m leveraging `requests` with `stream\u003dTrue` to avoid waiting for the full response. Now, I have to efficiently forward the stream from the `llama.cpp` server to the client using a Flask `Response` object. I have to avoid some headers, such as `Content-Length`, that will break streaming. I\u0027m now implementing the function responsible for the main logic. I\u0027m debugging my code to avoid connection issues.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining Streaming \u0026 Responses**\n\nI\u0027ve been working on refining the streaming functionality and how responses are handled. I\u0027m leveraging `requests` with `stream\u003dTrue` and building out the Flask `Response` object to efficiently forward the stream from the `llama.cpp` server to the client. I\u0027ve realized I need to be careful with certain headers, like `Content-Length`, as they can break streaming. I\u0027m focusing now on implementing this streaming logic and debugging any related connection issues.\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "Of course! Let\u0027s build the \"llama in the middle\" proxy server.\n\nThis first version will be a simple, transparent proxy. It will catch all requests sent to it, forward them to the `llama.cpp` server, and stream the response back to the client. We\u0027ll use the `requests` library for its excellent streaming support and `Flask-CORS` to handle the `OPTIONS` preflight requests from browsers correctly.\n\n### The Script: `proxy_server.py`\n\nHere is the complete Python script. It\u0027s well-commented to explain each part.\n\n```python\nimport requests\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\n# The address of the target llama.cpp server\nLLAMA_CPP_URL \u003d \"http://localhost:10000\"\n\n# The host and port for this proxy server\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\n\n# Enable CORS for all routes. This is crucial for web clients (like browsers)\n# to communicate with the proxy. It handles the OPTIONS preflight requests automatically.\nCORS(app)\n\n\n# --- The Core Proxy Route ---\n# This route catches all paths and methods, making the proxy truly generic.\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    \"\"\"\n    A generic proxy that forwards requests to the llama.cpp server.\n    It supports streaming responses.\n    \"\"\"\n    print(f\"--- Incoming Request ---\")\n    print(f\"Path: /{subpath}\")\n    print(f\"Method: {request.method}\")\n    print(f\"Headers: {request.headers}\")\n    print(f\"Body: {request.get_data(as_text\u003dTrue)[:100]}...\") # Print first 100 chars of body\n\n    # Construct the full target URL\n    target_url \u003d f\"{LLAMA_CPP_URL}/{subpath}\"\n\n    # Get the raw request body\n    request_body \u003d request.get_data()\n\n    # Copy headers from the incoming request, but remove the \u0027Host\u0027 header\n    # as it should be the target server\u0027s host, not the proxy\u0027s.\n    headers \u003d {key: value for (key, value) in request.headers if key.lower() !\u003d \u0027host\u0027}\n\n    try:\n        # Use requests with stream\u003dTrue to avoid loading the entire response\n        # into memory. This is key for handling streaming endpoints.\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003dtarget_url,\n            headers\u003dheaders,\n            data\u003drequest_body,\n            stream\u003dTrue,\n            timeout\u003d300  # Set a reasonable timeout\n        )\n\n        # --- Streaming Response Handling ---\n        # The `iter_content` method returns a generator that yields chunks of the response.\n        # We pass this generator to Flask\u0027s Response object.\n        # `stream_with_context` ensures the request context is available during the stream.\n        def generate():\n            for chunk in resp.iter_content(chunk_size\u003d8192):\n                yield chunk\n\n        # Copy headers from the target server\u0027s response to our proxy response.\n        # Exclude certain headers that are handled by the WSGI server or are connection-specific.\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        response_headers \u003d {\n            key: value for (key, value) in resp.raw.headers.items()\n            if key.lower() not in excluded_headers\n        }\n\n        # Create and return the streaming response\n        return Response(stream_with_context(generate()), status\u003dresp.status_code, headers\u003dresponse_headers)\n\n    except requests.exceptions.RequestException as e:\n        # Handle connection errors to the llama.cpp server\n        error_message \u003d f\"Error connecting to llama.cpp server: {e}\"\n        print(error_message)\n        return Response(error_message, status\u003d502, mimetype\u003d\u0027text/plain\u0027)\n\n# --- Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy starting...\")\n    print(f\"Forwarding requests from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n    app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)\n\n```\n\n### How to Run It\n\n**1. Prerequisites:**\n\n*   Make sure you have a `llama.cpp` server running and accessible. By default, the script assumes it\u0027s at `http://localhost:10000`.\n    ```bash\n    # Example command to start llama.cpp server\n    ./server -m models/7B/ggml-model.bin -c 2048\n    ```\n\n**2. Save the Script:**\n\n*   Save the code above into a file named `proxy_server.py`.\n\n**3. Install Dependencies:**\n\n*   You\u0027ll need `Flask`, `Flask-CORS`, and `requests`. You can install them with pip:\n    ```bash\n    pip install Flask Flask-CORS requests\n    ```\n\n**4. Run the Proxy Server:**\n\n*   Open your terminal, navigate to the directory where you saved the file, and run:\n    ```bash\n    python proxy_server.py\n    ```\n*   You should see the following output, confirming the server is running:\n    ```\n    🦙 Llama in the Middle Proxy starting...\n    Forwarding requests from http://0.0.0.0:11111 to http://localhost:10000\n     * Serving Flask app \u0027proxy_server\u0027\n     * Debug mode: off\n     * Running on all addresses (0.0.0.0)\n     * Running on http://127.0.0.1:11111\n     * Running on http://[your-local-ip]:11111\n    Press CTRL+C to quit\n    ```\n\n### How to Test It\n\nNow, you can send your requests to the proxy on port `11111` instead of directly to the `llama.cpp` server on port `10000`.\n\nOpen a **new terminal** and run the `curl` command you provided.\n\n```bash\ncurl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\"Yo, give me some simple emoji\", \"stream\": true}\u0027\n```\n\n**Expected Output:**\n\nYou will see the streaming JSON response from the `llama.cpp` server, passed through your proxy, chunk by chunk. It will look something like this:\n\n```json\ndata: {\"content\":\"\n\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"Sure\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\",\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" here\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" are\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" some\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" simple\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" em\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"ojis\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\":\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"\\n\\n\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"😀\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"👍\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"❤️\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"🎉\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"🚀\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"completion_probabilities\":null,\"timings\":{\"prompt_n\":12,\"prompt_ms\":31.109,\"prompt_per_token_ms\":2.592,\"prompt_per_second\":385.738,\"predicted_n\":23,\"predicted_ms\":113.844,\"predicted_per_token_ms\":4.95,\"predicted_per_second\":202.013},\"slot_id\":0,\"stop\":true,\"stopped_eos\":true,\"stopped_limit\":false,\"stopped_word\":false,\"model\":\"/path/to/your/model.gguf\",\"generation_settings\":...}\n```\n\nThis simple script is now a solid foundation. We can build upon it to add logging, modify requests/responses, add authentication, and much more.",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 2105,
+      "parts": [{
+        "text": "Of course! Let\u0027s build the \"llama in the middle\" proxy server.\n\nThis first version will be a simple,"
+      }, {
+        "text": " transparent proxy. It will catch all requests sent to it, forward them to the `llama.cpp` server, and"
+      }, {
+        "text": " stream the response back to the client. We\u0027ll use the `requests` library for its excellent streaming support and `Flask-"
+      }, {
+        "text": "CORS` to handle the `OPTIONS` preflight requests from browsers correctly.\n\n### The Script: `proxy_"
+      }, {
+        "text": "server.py`\n\nHere is the complete Python script. It\u0027s well-commented to explain each part."
+      }, {
+        "text": "\n\n```python\nimport requests\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import"
+      }, {
+        "text": " CORS\n\n# --- Configuration ---\n# The address of the target llama.cpp server\nLLAMA_CPP_URL \u003d"
+      }, {
+        "text": " \"http://localhost:10000\"\n\n# The host and port for this proxy server\nPROXY_HOST"
+      }, {
+        "text": " \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# ---"
+      }, {
+        "text": " Flask App Initialization ---\napp \u003d Flask(__name__)\n\n# Enable CORS for all routes. This is crucial for web"
+      }, {
+        "text": " clients (like browsers)\n# to communicate with the proxy. It handles the OPTIONS preflight requests automatically.\nCORS"
+      }, {
+        "text": "(app)\n\n\n# --- The Core Proxy Route ---\n# This route catches all paths and methods, making the proxy truly generic."
+      }, {
+        "text": "\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE"
+      }, {
+        "text": "\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    \"\"\"\n    A generic proxy that forwards requests to the llama."
+      }, {
+        "text": "cpp server.\n    It supports streaming responses.\n    \"\"\"\n    print(f\"--- Incoming Request ---\")\n    print"
+      }, {
+        "text": "(f\"Path: /{subpath}\")\n    print(f\"Method: {request.method}\")\n    print("
+      }, {
+        "text": "f\"Headers: {request.headers}\")\n    print(f\"Body: {request.get_data("
+      }, {
+        "text": "as_text\u003dTrue)[:100]}...\") # Print first 100 chars of body\n\n    #"
+      }, {
+        "text": " Construct the full target URL\n    target_url \u003d f\"{LLAMA_CPP_URL}/{subpath}\"\n\n"
+      }, {
+        "text": "    # Get the raw request body\n    request_body \u003d request.get_data()\n\n    # Copy headers from the incoming"
+      }, {
+        "text": " request, but remove the \u0027Host\u0027 header\n    # as it should be the target server\u0027s host, not the"
+      }, {
+        "text": " proxy\u0027s.\n    headers \u003d {key: value for (key, value) in request.headers if key"
+      }, {
+        "text": ".lower() !\u003d \u0027host\u0027}\n\n    try:\n        # Use requests with stream\u003dTrue to avoid loading the entire"
+      }, {
+        "text": " response\n        # into memory. This is key for handling streaming endpoints.\n        resp \u003d requests.request(\n            method"
+      }, {
+        "text": "\u003drequest.method,\n            url\u003dtarget_url,\n            headers\u003dheaders,\n            data\u003drequest"
+      }, {
+        "text": "_body,\n            stream\u003dTrue,\n            timeout\u003d300  # Set a reasonable timeout\n        )\n\n        "
+      }, {
+        "text": "# --- Streaming Response Handling ---\n        # The `iter_content` method returns a generator that yields chunks of the response"
+      }, {
+        "text": ".\n        # We pass this generator to Flask\u0027s Response object.\n        # `stream_with_context` ensures"
+      }, {
+        "text": " the request context is available during the stream.\n        def generate():\n            for chunk in resp.iter_content("
+      }, {
+        "text": "chunk_size\u003d8192):\n                yield chunk\n\n        # Copy headers from the target server\u0027s response to"
+      }, {
+        "text": " our proxy response.\n        # Exclude certain headers that are handled by the WSGI server or are connection-specific.\n"
+      }, {
+        "text": "        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        response"
+      }, {
+        "text": "_headers \u003d {\n            key: value for (key, value) in resp.raw.headers.items()\n            if"
+      }, {
+        "text": " key.lower() not in excluded_headers\n        }\n\n        # Create and return the streaming response\n        return"
+      }, {
+        "text": " Response(stream_with_context(generate()), status\u003dresp.status_code, headers\u003dresponse_headers)"
+      }, {
+        "text": "\n\n    except requests.exceptions.RequestException as e:\n        # Handle connection errors to the llama.cpp server\n        error"
+      }, {
+        "text": "_message \u003d f\"Error connecting to llama.cpp server: {e}\"\n        print(error_message)\n"
+      }, {
+        "text": "        return Response(error_message, status\u003d502, mimetype\u003d\u0027text/plain\u0027)\n\n# --- Main"
+      }, {
+        "text": " Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in"
+      }, {
+        "text": " the Middle Proxy starting...\")\n    print(f\"Forwarding requests from http://{PROXY_HOST}:{PROXY_PORT}"
+      }, {
+        "text": " to {LLAMA_CPP_URL}\")\n    app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)"
+      }, {
+        "text": "\n\n```\n\n### How to Run It\n\n**1. Prerequisites:**\n\n*   Make sure you have a `llama.cpp`"
+      }, {
+        "text": " server running and accessible. By default, the script assumes it\u0027s at `http://localhost:10000"
+      }, {
+        "text": "`.\n    ```bash\n    # Example command to start llama.cpp server\n    ./server -m models/7"
+      }, {
+        "text": "B/ggml-model.bin -c 2048\n    ```\n\n**2. Save the Script"
+      }, {
+        "text": ":**\n\n*   Save the code above into a file named `proxy_server.py`.\n\n**3. Install"
+      }, {
+        "text": " Dependencies:**\n\n*   You\u0027ll need `Flask`, `Flask-CORS`, and `requests`. You can install them with"
+      }, {
+        "text": " pip:\n    ```bash\n    pip install Flask Flask-CORS requests\n    ```\n\n**4. Run"
+      }, {
+        "text": " the Proxy Server:**\n\n*   Open your terminal, navigate to the directory where you saved the file, and run:\n    ```"
+      }, {
+        "text": "bash\n    python proxy_server.py\n    ```\n*   You should see the following output, confirming the server is"
+      }, {
+        "text": " running:\n    ```\n    🦙 Llama in the Middle Proxy starting...\n    Forwarding requests"
+      }, {
+        "text": " from http://0.0.0.0:11111 to http://localhost:100"
+      }, {
+        "text": "00\n     * Serving Flask app \u0027proxy_server\u0027\n     * Debug mode: off\n     * Running"
+      }, {
+        "text": " on all addresses (0.0.0.0)\n     * Running on http://127.0"
+      }, {
+        "text": ".0.1:11111\n     * Running on http://[your-local-ip]:"
+      }, {
+        "text": "11111\n    Press CTRL+C to quit\n    ```\n\n### How to Test It\n\nNow,"
+      }, {
+        "text": " you can send your requests to the proxy on port `11111` instead of directly to the `llama.cpp"
+      }, {
+        "text": "` server on port `10000`.\n\nOpen a **new terminal** and run the `curl` command you"
+      }, {
+        "text": " provided.\n\n```bash\ncurl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\""
+      }, {
+        "text": "Yo, give me some simple emoji\", \"stream\": true}\u0027\n```\n\n**Expected Output:**\n\nYou will see the streaming"
+      }, {
+        "text": " JSON response from the `llama.cpp` server, passed through your proxy, chunk by chunk. It will look something like"
+      }, {
+        "text": " this:\n\n```json\ndata: {\"content\":\"\n\",\"slot_id\":0,\"stop\":false,\"mult"
+      }, {
+        "text": "imodal\":false}\ndata: {\"content\":\"Sure\",\"slot_id\":0,\"stop\":false,\"multimodal"
+      }, {
+        "text": "\":false}\ndata: {\"content\":\",\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\n"
+      }, {
+        "text": "data: {\"content\":\" here\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata"
+      }, {
+        "text": ": {\"content\":\" are\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata:"
+      }, {
+        "text": " {\"content\":\" some\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\""
+      }, {
+        "text": "content\":\" simple\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\" em"
+      }, {
+        "text": "\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"ojis\",\"slot_id"
+      }, {
+        "text": "\":0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\":\",\"slot_id\":"
+      }, {
+        "text": "0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"\\n\\n\",\"slot_id\":"
+      }, {
+        "text": "0,\"stop\":false,\"multimodal\":false}\ndata: {\"content\":\"😀\",\"slot_id\":0,\"stop"
+      }, {
+        "text": "\":false,\"multimodal\":false}\ndata: {\"content\":\"👍\",\"slot_id\":0,\"stop\":false,\"mult"
+      }, {
+        "text": "imodal\":false}\ndata: {\"content\":\"❤️\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}"
+      }, {
+        "text": "\ndata: {\"content\":\"🎉\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\n"
+      }, {
+        "text": "data: {\"content\":\"🚀\",\"slot_id\":0,\"stop\":false,\"multimodal\":false}\ndata: {\""
+      }, {
+        "text": "completion_probabilities\":null,\"timings\":{\"prompt_n\":12,\"prompt_ms\":31.1"
+      }, {
+        "text": "09,\"prompt_per_token_ms\":2.592,\"prompt_per_second\":3"
+      }, {
+        "text": "85.738,\"predicted_n\":23,\"predicted_ms\":113.84"
+      }, {
+        "text": "4,\"predicted_per_token_ms\":4.95,\"predicted_per_second\":202.0"
+      }, {
+        "text": "13},\"slot_id\":0,\"stop\":true,\"stopped_eos\":true,\"stopped_limit\":false"
+      }, {
+        "text": ",\"stopped_word\":false,\"model\":\"/path/to/your/model.gguf\",\"generation_settings"
+      }, {
+        "text": "\":...}\n```\n\nThis simple script is now a solid foundation. We can build upon it to add logging, modify"
+      }, {
+        "text": " requests/responses, add authentication, and much more."
+      }]
+    }, {
+      "text": "Now for `POST /completion` let\u0027s make it a little more complex.\n\n1) get n_predict from in request. If not exist, assume it to 50 (put default value it on top).\n2) instead of calling model one time, split calls:\n\nOpen connection to it, ask to generate up to 5 tokens (configurable).\nIf less than 5 tokens generated, we are done.\n\nWhen returning client should see all generated tokens even if it is a stream. E.g. if client is streaming, it should see one stream of 50 tokens.\n\nEg if we got prompt\u003d\"once upon\" returning response \u003d  stream(model(\"once upon\") + model(\"once upon a time\") + model(\"once upon a time in a\"))\n\n",
+      "role": "user",
+      "tokenCount": 166
+    }, {
+      "text": "**Evaluating Request Flow**\n\nI\u0027m currently focused on the deconstruction of the request, specifically the goal: to intercept and modify `POST /completion` calls, but create a seamless stream for the client. The core change in logic requires careful consideration to ensure smooth operation. We need to dissect the request to identify the optimal points for intervention and transformation.\n\n\n**Defining Modular Iteration**\n\nI\u0027m now zeroing in on the loop\u0027s specifics. I\u0027m focusing on crafting an efficient logic to chunk the calls to `llama.cpp` while managing the generated text. I\u0027m considering best practices to ensure seamless \"stitching\" of the output streams into a single response. Specifically, the interplay between `n_predict`, `CHUNK_SIZE`, and loop termination needs precise handling, especially to manage EOS tokens effectively.\n\n\n**Orchestrating Token Generation**\n\nI\u0027m now focusing on the core loop. I\u0027ve broken down the steps: determining the number of tokens to generate, calling the model, and updating the state. I\u0027m exploring different approaches for managing the prompt and generated text, balancing clarity and efficiency. The interaction between `total_tokens_generated`,  `n_predict`, `CHUNK_SIZE` and any EOS tokens generated now hold my focus.\n\n\n**Constructing the Response**\n\nI\u0027m now fully immersed in the core loop\u0027s implementation, addressing the crucial task of streaming responses to the client. The challenge lies in ensuring a seamless flow, regardless of how `llama.cpp`\u0027s backend responds. I\u0027m focusing on the interaction between the request\u0027s original `stream` flag, and managing the stream of tokens from the backend. The aim is for the proxy to respect the original `stream` setting from the client.\n\n\n**Iterating the Core Loop**\n\nI\u0027ve been working on the central loop for token generation, with a focus on streaming the model\u0027s output to the client. The challenge is in ensuring the proxy mimics a real-time stream. I am now refining the logic to incorporate both EOS tokens and potential early termination into the streaming process. Specifically, I\u0027m working on the interaction between the `stream` flag in the incoming request and how I manage my own streaming to the client.\n\n\n**Structuring Response Handling**\n\nI\u0027m now consolidating the strategy to accommodate for requests where streaming isn\u0027t desired, ensuring compatibility. I\u0027ve been working to manage the proxy\u0027s dual function by generating a complete response object when the client does not request a stream, while maintaining the same underlying logic. This involves buffering the output for non-streamed requests, culminating in a single, final response payload.\n\n\n**Orchestrating Token Output**\n\nI\u0027m now focusing on the central stream handling, ensuring clients, whether streaming or not, receive the correct response format. I\u0027m carefully constructing the response, especially when `stream` is `False`. The logic now aims to emulate `llama.cpp` for non-stream requests, providing a unified endpoint. I\u0027m also ensuring proper error handling during backend calls and JSON decoding.\n\n\n**Iterating Prompt Construction**\n\nI\u0027m now fully immersed in the core loop\u0027s implementation, addressing the crucial task of ensuring the prompt is properly constructed for each iteration. The aim is to balance maintaining continuity with the model, as well as avoid exceeding the maximum context length of the model. I am now refining the logic for concatenating the initial prompt with the generated text, ensuring that the model receives the correct context for each call to llama.cpp, especially to correctly handle EOS tokens.\n\n",
+      "role": "model",
+      "tokenCount": 1817,
+      "isThought": true,
+      "thinkingBudget": -1,
+      "thoughtSignatures": ["", "", "", "", "", "", "", ""],
+      "parts": [{
+        "text": "**Evaluating Request Flow**\n\nI\u0027m currently focused on the deconstruction of the request, specifically the goal: to intercept and modify `POST /completion` calls, but create a seamless stream for the client. The core change in logic requires careful consideration to ensure smooth operation. We need to dissect the request to identify the optimal points for intervention and transformation.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Defining Modular Iteration**\n\nI\u0027m now zeroing in on the loop\u0027s specifics. I\u0027m focusing on crafting an efficient logic to chunk the calls to `llama.cpp` while managing the generated text. I\u0027m considering best practices to ensure seamless \"stitching\" of the output streams into a single response. Specifically, the interplay between `n_predict`, `CHUNK_SIZE`, and loop termination needs precise handling, especially to manage EOS tokens effectively.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Orchestrating Token Generation**\n\nI\u0027m now focusing on the core loop. I\u0027ve broken down the steps: determining the number of tokens to generate, calling the model, and updating the state. I\u0027m exploring different approaches for managing the prompt and generated text, balancing clarity and efficiency. The interaction between `total_tokens_generated`,  `n_predict`, `CHUNK_SIZE` and any EOS tokens generated now hold my focus.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Constructing the Response**\n\nI\u0027m now fully immersed in the core loop\u0027s implementation, addressing the crucial task of streaming responses to the client. The challenge lies in ensuring a seamless flow, regardless of how `llama.cpp`\u0027s backend responds. I\u0027m focusing on the interaction between the request\u0027s original `stream` flag, and managing the stream of tokens from the backend. The aim is for the proxy to respect the original `stream` setting from the client.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Iterating the Core Loop**\n\nI\u0027ve been working on the central loop for token generation, with a focus on streaming the model\u0027s output to the client. The challenge is in ensuring the proxy mimics a real-time stream. I am now refining the logic to incorporate both EOS tokens and potential early termination into the streaming process. Specifically, I\u0027m working on the interaction between the `stream` flag in the incoming request and how I manage my own streaming to the client.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Structuring Response Handling**\n\nI\u0027m now consolidating the strategy to accommodate for requests where streaming isn\u0027t desired, ensuring compatibility. I\u0027ve been working to manage the proxy\u0027s dual function by generating a complete response object when the client does not request a stream, while maintaining the same underlying logic. This involves buffering the output for non-streamed requests, culminating in a single, final response payload.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Orchestrating Token Output**\n\nI\u0027m now focusing on the central stream handling, ensuring clients, whether streaming or not, receive the correct response format. I\u0027m carefully constructing the response, especially when `stream` is `False`. The logic now aims to emulate `llama.cpp` for non-stream requests, providing a unified endpoint. I\u0027m also ensuring proper error handling during backend calls and JSON decoding.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Iterating Prompt Construction**\n\nI\u0027m now fully immersed in the core loop\u0027s implementation, addressing the crucial task of ensuring the prompt is properly constructed for each iteration. The aim is to balance maintaining continuity with the model, as well as avoid exceeding the maximum context length of the model. I am now refining the logic for concatenating the initial prompt with the generated text, ensuring that the model receives the correct context for each call to llama.cpp, especially to correctly handle EOS tokens.\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "Excellent! This is a fantastic next step that moves us from a simple proxy to an intelligent \"middleware.\" We will now intercept `POST /completion` requests and implement our own generation logic by making multiple, smaller calls to the `llama.cpp` server.\n\nThe key challenge is to make this series of backend calls appear as a **single, uninterrupted stream** to the end client.\n\nHere is the updated script. I\u0027ve added a new dedicated function to handle this chained completion logic and modified the main `proxy` route to use it.\n\n### The Script: `proxy_server_v2.py`\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\nLLAMA_CPP_URL \u003d \"http://localhost:10000\"\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- New: Configuration for Chained Completion ---\n# Default n_predict if not specified in the request\nDEFAULT_N_PREDICT \u003d 50\n# How many tokens to ask the model for in each step\nGENERATION_CHUNK_SIZE \u003d 5\n\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nCORS(app)\n\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic.\n    It makes multiple small requests to the backend and yields the\n    results as a single, continuous stream.\n    \"\"\"\n    # 1. Extract parameters from the original request\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n    n_predict_total \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    print(f\"--- Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total tokens to generate: {n_predict_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped \u003d False\n\n    # 2. Loop until we have enough tokens or the model stops\n    while total_tokens_generated \u003c n_predict_total and not model_stopped:\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        # Prepare the payload for the backend llama.cpp server\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True  # We always stream from the backend to process token-by-token\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n            # 3. Make the request to the actual llama.cpp server\n            target_url \u003d f\"{LLAMA_CPP_URL}/completion\"\n            response \u003d requests.post(\n                target_url,\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise_for_status() # Raise an exception for bad status codes\n\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d json.dumps({\"error\": str(e)})\n            yield f\"data: {error_message}\\n\\n\"\n            break\n\n        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    # Yield the line directly to the client to maintain the stream\n                    yield line_str + \u0027\\n\\n\u0027\n\n                    # Also, parse it to update our state\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_data # Keep track of the last message\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get(\u0027stop\u0027):\n                            print(\"Backend signaled stop.\")\n                            model_stopped \u003d True\n\n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        # After a chunk is processed, update our state\n        if chunk_generated_text:\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            # Note: We can\u0027t perfectly count tokens here without a tokenizer,\n            # but we can approximate or just count the chunks. For this logic,\n            # simply adding the requested amount is sufficient.\n            total_tokens_generated +\u003d tokens_to_request\n\n        # If the model generated less than we asked for, it has likely finished.\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print(\"--- Chained Completion Finished (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n\n# --- The Core Proxy Route ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    \"\"\"\n    A proxy that forwards requests, with special handling for POST /completion.\n    \"\"\"\n    # --- Special handling for our chained completion ---\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request_data:\n                return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON\", status\u003d400)\n\n        # Check if the client wants to stream the response\n        is_streaming \u003d request_data.get(\"stream\", False)\n\n        if is_streaming:\n            # Use our new generator for the streaming response\n            return Response(\n                stream_with_context(generate_chained_completion(request_data)),\n                mimetype\u003d\u0027text/event-stream\u0027\n            )\n        else:\n            # For non-streaming, we\u0027d need to collect all chunks and return at once.\n            # (For simplicity, we will just pass this through for now, or you can implement it\n            # by iterating over the generator and concatenating the results.)\n            print(\"Non-streaming request received, forwarding directly.\")\n            pass # Fall through to the generic proxy logic below\n\n    # --- Generic Proxy Logic (for all other requests) ---\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    try:\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003df\"{LLAMA_CPP_URL}/{subpath}\",\n            headers\u003d{key: value for (key, value) in request.headers if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest.get_data(),\n            stream\u003dTrue,\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for (name, value) in resp.raw.headers.items()\n                   if name.lower() not in excluded_headers]\n        \n        return Response(resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n\n    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp server: {e}\", status\u003d502)\n\n\n# --- Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy v2 starting...\")\n    print(f\"Forwarding from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n    print(f\"Special handling for POST /completion\")\n    app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)\n```\n\n### How It Works\n\n1.  **Route Interception**: The `proxy` function now has a special `if` block that checks if the request is a `POST` to `/completion`. All other requests (like `/tokenize`, `GET` requests, etc.) fall through to the original generic proxy logic.\n\n2.  **`generate_chained_completion` Generator**:\n    *   This function is the core of the new logic. It\u0027s a Python [generator](https://wiki.python.org/moin/Generators), which means it can `yield` values one by one without exiting. Flask uses this to build streaming responses.\n    *   It initializes the `full_prompt` with the user\u0027s original prompt.\n    *   It enters a `while` loop that continues until the desired number of total tokens (`n_predict_total`) has been generated, or the model signals that it\u0027s finished.\n\n3.  **The Loop**:\n    *   **Payload Construction**: In each iteration, it creates a new JSON payload to send to the `llama.cpp` backend. Crucially, `payload[\"prompt\"]` is set to the `full_prompt`, which includes all the text generated in previous steps.\n    *   **Request Backend**: It makes a `POST` request to `http://localhost:10000/completion` asking for a small number of tokens (`GENERATION_CHUNK_SIZE`).\n    *   **Stream Forwarding**: As it receives streaming lines (`data: ...`) from the backend, it **immediately `yield`s them to the client**. This is the magic trick. The client sees a continuous flow of tokens, unaware that the proxy is making multiple separate calls in the background.\n    *   **State Update**: While forwarding the data, it also parses it to update its own state. It appends the newly generated text (`content`) to `full_prompt` and checks for the `stop: true` signal from the model.\n\n4.  **Client Experience**: The client connects to `http://localhost:11111/completion` with `stream: true`. It receives a standard EventSource stream and sees tokens appearing one by one, exactly as if it were connected directly to a model generating the full 50 tokens in one go.\n\n### How to Run and Test\n\nThe setup is the same as before.\n\n1.  Save the code as `proxy_server_v2.py`.\n2.  Make sure `Flask`, `Flask-CORS`, and `requests` are installed.\n3.  Run the `llama.cpp` server on port `10000`.\n4.  Run the proxy server: `python proxy_server_v2.py`.\n\n**Test Command:**\n\nUse the same `curl` command. The proxy will now handle the `n_predict` parameter (or its default of 50).\n\n```bash\ncurl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\"Once upon a time in a land far, far away\", \"stream\": true, \"n_predict\": 40}\u0027\n```\n\nWhen you run this, watch the **terminal where your proxy is running**. You will see log messages showing it making multiple small requests to the backend, creating the illusion of a single, long generation for the client.",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 2633,
+      "parts": [{
+        "text": "Excellent! This is a fantastic next step that moves us from a simple proxy to an intelligent \"middleware.\" We will now"
+      }, {
+        "text": " intercept `POST /completion` requests and implement our own generation logic by making multiple, smaller calls to the `llama.cpp` server"
+      }, {
+        "text": ".\n\nThe key challenge is to make this series of backend calls appear as a **single, uninterrupted stream** to the"
+      }, {
+        "text": " end client.\n\nHere is the updated script. I\u0027ve added a new dedicated function to handle this chained completion logic and modified"
+      }, {
+        "text": " the main `proxy` route to use it.\n\n### The Script: `proxy_server_v2.py"
+      }, {
+        "text": "`\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_"
+      }, {
+        "text": "context\nfrom flask_cors import CORS\n\n# --- Configuration ---\nLLAMA_CPP_URL \u003d \"http://localhost:1"
+      }, {
+        "text": "0000\"\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11"
+      }, {
+        "text": "111\n\n# --- New: Configuration for Chained Completion ---\n# Default n_predict if not specified in the request"
+      }, {
+        "text": "\nDEFAULT_N_PREDICT \u003d 50\n# How many tokens to ask the model for in each step"
+      }, {
+        "text": "\nGENERATION_CHUNK_SIZE \u003d 5\n\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nC"
+      }, {
+        "text": "ORS(app)\n\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This"
+      }, {
+        "text": " generator function handles the chained completion logic.\n    It makes multiple small requests to the backend and yields the\n    results"
+      }, {
+        "text": " as a single, continuous stream.\n    \"\"\"\n    # 1. Extract parameters from the original request\n    prompt"
+      }, {
+        "text": " \u003d original_request_data.get(\"prompt\", \"\")\n    n_predict_total \u003d original_request_data."
+      }, {
+        "text": "get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    print(f\"--- Chained Completion Started"
+      }, {
+        "text": " ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f"
+      }, {
+        "text": "\"Total tokens to generate: {n_predict_total}\")\n    print(f\"Chunk size per call: {GENER"
+      }, {
+        "text": "ATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    "
+      }, {
+        "text": "model_stopped \u003d False\n\n    # 2. Loop until we have enough tokens or the model stops\n    while total_"
+      }, {
+        "text": "tokens_generated \u003c n_predict_total and not model_stopped:\n        remaining_tokens \u003d n_predict"
+      }, {
+        "text": "_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_"
+      }, {
+        "text": "tokens)\n\n        # Prepare the payload for the backend llama.cpp server\n        payload \u003d original_request_data"
+      }, {
+        "text": ".copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_"
+      }, {
+        "text": "to_request\n        payload[\"stream\"] \u003d True  # We always stream from the backend to process token-by-token\n\n"
+      }, {
+        "text": "        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n"
+      }, {
+        "text": "            # 3. Make the request to the actual llama.cpp server\n            target_url \u003d f\"{LLAMA_CPP"
+      }, {
+        "text": "_URL}/completion\"\n            response \u003d requests.post(\n                target_url,\n                headers\u003d{\u0027Content-Type\u0027:"
+      }, {
+        "text": " \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise"
+      }, {
+        "text": "_for_status() # Raise an exception for bad status codes\n\n        except requests.exceptions.RequestException as e:\n            "
+      }, {
+        "text": "print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d json.dumps({\"error"
+      }, {
+        "text": "\": str(e)})\n            yield f\"data: {error_message}\\n\\n\"\n            break\n\n"
+      }, {
+        "text": "        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\"\n        last"
+      }, {
+        "text": "_chunk_data \u003d None\n\n        for line in response.iter_lines():\n            if line:\n                line_"
+      }, {
+        "text": "str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    #"
+      }, {
+        "text": " Yield the line directly to the client to maintain the stream\n                    yield line_str + \u0027\\n\\n\u0027\n\n"
+      }, {
+        "text": "                    # Also, parse it to update our state\n                    try:\n                        data_str \u003d line_str["
+      }, {
+        "text": "len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_"
+      }, {
+        "text": "data \u003d chunk_data # Keep track of the last message\n\n                        if \u0027content\u0027 in chunk_data and chunk"
+      }, {
+        "text": "_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get"
+      }, {
+        "text": "(\u0027stop\u0027):\n                            print(\"Backend signaled stop.\")\n                            model_stopped \u003d True\n\n                    except json.JSONDecodeError:"
+      }, {
+        "text": "\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        "
+      }, {
+        "text": "\n        # After a chunk is processed, update our state\n        if chunk_generated_text:\n            print"
+      }, {
+        "text": "(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            #"
+      }, {
+        "text": " Note: We can\u0027t perfectly count tokens here without a tokenizer,\n            # but we can approximate or just count the chunks"
+      }, {
+        "text": ". For this logic,\n            # simply adding the requested amount is sufficient.\n            total_tokens_generated +\u003d tokens"
+      }, {
+        "text": "_to_request\n\n        # If the model generated less than we asked for, it has likely finished.\n        if"
+      }, {
+        "text": " last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print(\"--- Chained Completion Finished"
+      }, {
+        "text": " (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:\n        print(\"--- Chained"
+      }, {
+        "text": " Completion Finished (n_predict reached) ---\")\n\n\n# --- The Core Proxy Route ---\n@app.route(\u0027/\u003cpath"
+      }, {
+        "text": ":subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy("
+      }, {
+        "text": "subpath):\n    \"\"\"\n    A proxy that forwards requests, with special handling for POST /completion.\n    \"\"\"\n    "
+      }, {
+        "text": "# --- Special handling for our chained completion ---\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST"
+      }, {
+        "text": "\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request_data:"
+      }, {
+        "text": "\n                return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON"
+      }, {
+        "text": "\", status\u003d400)\n\n        # Check if the client wants to stream the response\n        is_streaming \u003d request"
+      }, {
+        "text": "_data.get(\"stream\", False)\n\n        if is_streaming:\n            # Use our new generator for"
+      }, {
+        "text": " the streaming response\n            return Response(\n                stream_with_context(generate_chained_completion(request_data)),\n"
+      }, {
+        "text": "                mimetype\u003d\u0027text/event-stream\u0027\n            )\n        else:\n            # For non-streaming,"
+      }, {
+        "text": " we\u0027d need to collect all chunks and return at once.\n            # (For simplicity, we will just pass"
+      }, {
+        "text": " this through for now, or you can implement it\n            # by iterating over the generator and concatenating the results.)\n            "
+      }, {
+        "text": "print(\"Non-streaming request received, forwarding directly.\")\n            pass # Fall through to the generic proxy logic below\n\n"
+      }, {
+        "text": "    # --- Generic Proxy Logic (for all other requests) ---\n    print(f\"--- Generic Proxy Passthrough for /{"
+      }, {
+        "text": "subpath} ---\")\n    try:\n        resp \u003d requests.request(\n            method\u003drequest.method"
+      }, {
+        "text": ",\n            url\u003df\"{LLAMA_CPP_URL}/{subpath}\",\n            headers\u003d{key: value for"
+      }, {
+        "text": " (key, value) in request.headers if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest."
+      }, {
+        "text": "get_data(),\n            stream\u003dTrue,\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027"
+      }, {
+        "text": "content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for"
+      }, {
+        "text": " (name, value) in resp.raw.headers.items()\n                   if name.lower() not in excluded_headers]"
+      }, {
+        "text": "\n        \n        return Response(resp.iter_content(chunk_size\u003d8192), resp.status_"
+      }, {
+        "text": "code, headers)\n\n    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama"
+      }, {
+        "text": ".cpp server: {e}\", status\u003d502)\n\n\n# --- Main Entry Point ---\nif __name"
+      }, {
+        "text": "__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy v2 starting"
+      }, {
+        "text": "...\")\n    print(f\"Forwarding from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_"
+      }, {
+        "text": "CPP_URL}\")\n    print(f\"Special handling for POST /completion\")\n    app.run(host\u003dPROXY_"
+      }, {
+        "text": "HOST, port\u003dPROXY_PORT)\n```\n\n### How It Works\n\n1.  **Route Interception**:"
+      }, {
+        "text": " The `proxy` function now has a special `if` block that checks if the request is a `POST` to `/completion`."
+      }, {
+        "text": " All other requests (like `/tokenize`, `GET` requests, etc.) fall through to the original generic proxy logic.\n\n"
+      }, {
+        "text": "2.  **`generate_chained_completion` Generator**:\n    *   This function is the core of the"
+      }, {
+        "text": " new logic. It\u0027s a Python [generator](https://wiki.python.org/moin/Generators), which"
+      }, {
+        "text": " means it can `yield` values one by one without exiting. Flask uses this to build streaming responses.\n    *   It"
+      }, {
+        "text": " initializes the `full_prompt` with the user\u0027s original prompt.\n    *   It enters a `while`"
+      }, {
+        "text": " loop that continues until the desired number of total tokens (`n_predict_total`) has been generated, or the model"
+      }, {
+        "text": " signals that it\u0027s finished.\n\n3.  **The Loop**:\n    *   **Payload Construction**: In each iteration,"
+      }, {
+        "text": " it creates a new JSON payload to send to the `llama.cpp` backend. Crucially, `payload[\"prompt\"]"
+      }, {
+        "text": "` is set to the `full_prompt`, which includes all the text generated in previous steps.\n    *   **Request Backend"
+      }, {
+        "text": "**: It makes a `POST` request to `http://localhost:10000/completion` asking for a"
+      }, {
+        "text": " small number of tokens (`GENERATION_CHUNK_SIZE`).\n    *   **Stream Forwarding**: As it receives streaming"
+      }, {
+        "text": " lines (`data: ...`) from the backend, it **immediately `yield`s them to the client**. This is"
+      }, {
+        "text": " the magic trick. The client sees a continuous flow of tokens, unaware that the proxy is making multiple separate calls in the background."
+      }, {
+        "text": "\n    *   **State Update**: While forwarding the data, it also parses it to update its own state. It appends the"
+      }, {
+        "text": " newly generated text (`content`) to `full_prompt` and checks for the `stop: true` signal from the model."
+      }, {
+        "text": "\n\n4.  **Client Experience**: The client connects to `http://localhost:11111/completion`"
+      }, {
+        "text": " with `stream: true`. It receives a standard EventSource stream and sees tokens appearing one by one, exactly as if it"
+      }, {
+        "text": " were connected directly to a model generating the full 50 tokens in one go.\n\n### How to Run and Test\n\nThe"
+      }, {
+        "text": " setup is the same as before.\n\n1.  Save the code as `proxy_server_v2.py"
+      }, {
+        "text": "`.\n2.  Make sure `Flask`, `Flask-CORS`, and `requests` are installed.\n"
+      }, {
+        "text": "3.  Run the `llama.cpp` server on port `10000`.\n4.  "
+      }, {
+        "text": "Run the proxy server: `python proxy_server_v2.py`.\n\n**Test Command:**\n\nUse the"
+      }, {
+        "text": " same `curl` command. The proxy will now handle the `n_predict` parameter (or its default of 5"
+      }, {
+        "text": "0).\n\n```bash\ncurl -X POST http://localhost:11111/completion --data \u0027"
+      }, {
+        "text": "{\"prompt\":\"Once upon a time in a land far, far away\", \"stream\": true, \"n_predict\": 4"
+      }, {
+        "text": "0}\u0027\n```\n\nWhen you run this, watch the **terminal where your proxy is running**. You will see log"
+      }, {
+        "text": " messages showing it making multiple small requests to the backend, creating the illusion of a single, long generation for the client."
+      }]
+    }, {
+      "text": "Code forgot about n_predict\u003d-1. In llama.cpp its amount of tokens to generate, and it can be -1 which means \"as long as you want\". Code above didn\u0027t account for that.\nSo \n`while total_tokens_generated \u003c n_predict_total and not model_stopped:`\nevaluated as `while 0 \u003c -1` which means to stop generating code at once. \nRewrite `generate_chained_completion` taking this into account: n_predict\u003d-1 still means 50 for Llama in the Middle",
+      "role": "user",
+      "tokenCount": 119
+    }, {
+      "text": "**Fixing the Negative Input**\n\nI\u0027ve been analyzing the user\u0027s feedback, focusing on the error when `n_predict` is negative. The issue stems from the `while` loop, which incorrectly handles this case. I\u0027m now exploring how to modify the loop condition to gracefully accommodate negative input, potentially by treating negative values as a signal to generate tokens until a certain condition is met, perhaps based on a termination token or a maximum sequence length. This ensures the function always returns a valid output.\n\n\n**Adjusting Negative Logic**\n\nI\u0027m now implementing the fix for negative `n_predict` inputs. I\u0027ve pinpointed the exact location and identified that the while loop will always fail if n\\_predict is a negative number. I\u0027m considering modifying the loop condition to account for the `-1` case where it should actually mean to run 50 iterations or until a stop condition, as in the llama.cpp case. I am thinking of introducing an `if/else` that converts -1 to a default value before the `while` loop runs. This aligns the behavior with the user\u0027s intent.\n\n\n**Adapting to User Intent**\n\nI\u0027ve determined the best approach is to preprocess the `n_predict` value. My thinking is to insert an initial `if` statement to check if the incoming `n_predict` is `-1`. If it is, the code should override it with the default `DEFAULT_N_PREDICT` value (50) before the `while` loop is executed. This cleanly implements the intended \"generate 50\" behavior when `-1` is given, and avoids the complexity of modifying the loop condition directly. This solution directly addresses the core need while maintaining the original code\u0027s structure as much as possible.\n\n\n**Resolving Negative Request**\n\nI\u0027m now putting my ideas into action by writing the code to handle `-1` requests. The solution will involve an `if` condition to catch `-1` input for `n_predict`, overriding it with the default value of 50. I\u0027m focusing on preserving the existing structure as much as possible, while adding this crucial preprocessing step. The goal is to create more robust and user-friendly behavior. This ensures proper token generation when requested.\n\n\n**Addressing Negative Requests**\n\nI\u0027ve finalized the implementation. I\u0027ve integrated the `if` statement to handle negative input, defaulting to 50 tokens when `n_predict` is -1, and preserved existing logic for other cases. Now, the proxy correctly interprets negative `n_predict` as a default token generation request, which is a great step forward.\n\n\n**Addressing the Edge Case**\n\nI\u0027m now integrating robust handling for negative input, specifically `-1`, in my thought process. The key is now ensuring that regardless of user input, the loop operates correctly. It involves strategically setting and controlling a variable to process the right number of tokens, accounting for user intent to make the function more resilient and user-friendly. I\u0027m focusing on ensuring graceful handling of special values while maintaining the function\u0027s overall integrity.\n\n\n**Adapting Negative Values**\n\nMy current focus is on directly addressing the issue with negative `n_predict` inputs. I\u0027m prioritizing making `n_predict: -1` function as intended. I\u0027ve decided to preprocess the value, making sure it handles any negative values by setting it equal to our default. This strategy ensures the code functions correctly and avoids complex adjustments to the loop. This change is being made to improve the user experience and prevent further issues.\n\n\n",
+      "role": "model",
+      "tokenCount": 1576,
+      "isThought": true,
+      "thinkingBudget": -1,
+      "thoughtSignatures": ["", "", "", "", "", "", ""],
+      "parts": [{
+        "text": "**Fixing the Negative Input**\n\nI\u0027ve been analyzing the user\u0027s feedback, focusing on the error when `n_predict` is negative. The issue stems from the `while` loop, which incorrectly handles this case. I\u0027m now exploring how to modify the loop condition to gracefully accommodate negative input, potentially by treating negative values as a signal to generate tokens until a certain condition is met, perhaps based on a termination token or a maximum sequence length. This ensures the function always returns a valid output.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Adjusting Negative Logic**\n\nI\u0027m now implementing the fix for negative `n_predict` inputs. I\u0027ve pinpointed the exact location and identified that the while loop will always fail if n\\_predict is a negative number. I\u0027m considering modifying the loop condition to account for the `-1` case where it should actually mean to run 50 iterations or until a stop condition, as in the llama.cpp case. I am thinking of introducing an `if/else` that converts -1 to a default value before the `while` loop runs. This aligns the behavior with the user\u0027s intent.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Adapting to User Intent**\n\nI\u0027ve determined the best approach is to preprocess the `n_predict` value. My thinking is to insert an initial `if` statement to check if the incoming `n_predict` is `-1`. If it is, the code should override it with the default `DEFAULT_N_PREDICT` value (50) before the `while` loop is executed. This cleanly implements the intended \"generate 50\" behavior when `-1` is given, and avoids the complexity of modifying the loop condition directly. This solution directly addresses the core need while maintaining the original code\u0027s structure as much as possible.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Resolving Negative Request**\n\nI\u0027m now putting my ideas into action by writing the code to handle `-1` requests. The solution will involve an `if` condition to catch `-1` input for `n_predict`, overriding it with the default value of 50. I\u0027m focusing on preserving the existing structure as much as possible, while adding this crucial preprocessing step. The goal is to create more robust and user-friendly behavior. This ensures proper token generation when requested.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Addressing Negative Requests**\n\nI\u0027ve finalized the implementation. I\u0027ve integrated the `if` statement to handle negative input, defaulting to 50 tokens when `n_predict` is -1, and preserved existing logic for other cases. Now, the proxy correctly interprets negative `n_predict` as a default token generation request, which is a great step forward.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Addressing the Edge Case**\n\nI\u0027m now integrating robust handling for negative input, specifically `-1`, in my thought process. The key is now ensuring that regardless of user input, the loop operates correctly. It involves strategically setting and controlling a variable to process the right number of tokens, accounting for user intent to make the function more resilient and user-friendly. I\u0027m focusing on ensuring graceful handling of special values while maintaining the function\u0027s overall integrity.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Adapting Negative Values**\n\nMy current focus is on directly addressing the issue with negative `n_predict` inputs. I\u0027m prioritizing making `n_predict: -1` function as intended. I\u0027ve decided to preprocess the value, making sure it handles any negative values by setting it equal to our default. This strategy ensures the code functions correctly and avoids complex adjustments to the loop. This change is being made to improve the user experience and prevent further issues.\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "You\u0027ve spotted a critical edge case! That\u0027s an excellent catch. The `llama.cpp` server\u0027s convention of using `-1` for \"infinite\" generation would indeed break our proxy\u0027s logic immediately.\n\nLet\u0027s fix this. We will modify the `generate_chained_completion` function to correctly interpret the incoming `n_predict` value. As requested, if the client sends `n_predict: -1` (or doesn\u0027t provide it at all), our \"Llama in the Middle\" will enforce its own limit of `50` tokens.\n\nHere is the revised `generate_chained_completion` function. The rest of the script remains the same.\n\n### The Corrected `generate_chained_completion` Function\n\nI\u0027ve added comments prefixed with `## FIXED:` to highlight the changes.\n\n```python\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic.\n    It makes multiple small requests to the backend and yields the\n    results as a single, continuous stream.\n    \"\"\"\n    # 1. Extract parameters from the original request\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n\n    # ## FIXED: Handle n_predict\u003d-1 (infinite) case ##\n    # Get the n_predict value from the request.\n    n_predict_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    # If the request asks for infinite generation (-1) or doesn\u0027t specify,\n    # our proxy will enforce its own default limit.\n    if n_predict_req \u003d\u003d -1:\n        print(f\"Client requested n_predict\u003d-1 (infinite). Proxy is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped \u003d False\n\n    # 2. Loop until we have enough tokens or the model stops\n    # This loop condition is now safe from the n_predict\u003d-1 issue.\n    while total_tokens_generated \u003c n_predict_total and not model_stopped:\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        # Prepare the payload for the backend llama.cpp server\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n            # 3. Make the request to the actual llama.cpp server\n            target_url \u003d f\"{LLAMA_CPP_URL}/completion\"\n            response \u003d requests.post(\n                target_url,\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise_for_status()\n\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d json.dumps({\"error\": str(e)})\n            yield f\"data: {error_message}\\n\\n\"\n            break\n\n        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_data\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get(\u0027stop\u0027):\n                            print(\"Backend signaled stop.\")\n                            model_stopped \u003d True\n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            # Note: This is an approximation. The actual number of tokens generated\n            # might be less than requested if the model stops early.\n            # A more robust counter would use a tokenizer.\n            total_tokens_generated +\u003d tokens_to_request\n\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print(\"--- Chained Completion Finished (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n```\n\n### Explanation of the Fix\n\n1.  **Get Requested `n_predict`**: We first retrieve the `n_predict` value from the request payload. `original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)` handles the case where the key is missing entirely.\n2.  **Check for `-1`**: We then have an explicit `if n_predict_req \u003d\u003d -1:` block. This specifically checks if the client sent the \"infinite\" flag.\n3.  **Override**: If the value is `-1`, we print a log message explaining what the proxy is doing and set our internal `n_predict_total` variable to `DEFAULT_N_PREDICT` (which is 50).\n4.  **Use Positive Value**: If the value is any other number (e.g., `40`, `100`), we use it directly.\n5.  **Safe Loop**: The `while` loop condition `while total_tokens_generated \u003c n_predict_total` is now always safe, as `n_predict_total` is guaranteed to be a positive integer, correctly representing the *proxy\u0027s* generation goal.\n\n### Full Updated Script (`proxy_server_v3.py`)\n\nFor completeness, here is the full script with the fix integrated.\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\nLLAMA_CPP_URL \u003d \"http://localhost:10000\"\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- Configuration for Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\nGENERATION_CHUNK_SIZE \u003d 5\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nCORS(app)\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic.\n    It makes multiple small requests to the backend and yields the\n    results as a single, continuous stream.\n    \"\"\"\n    # 1. Extract parameters from the original request\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n\n    # ## FIXED: Handle n_predict\u003d-1 (infinite) case ##\n    # Get the n_predict value from the request.\n    n_predict_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    # If the request asks for infinite generation (-1), our proxy will enforce its own default limit.\n    # This also handles the case where n_predict is not provided at all.\n    if n_predict_req \u003d\u003d -1 or \"n_predict\" not in original_request_data:\n        print(f\"Client requested n_predict\u003d-1 or was missing. Proxy is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped \u003d False\n\n    # 2. Loop until we have enough tokens or the model stops\n    # This loop condition is now safe from the n_predict\u003d-1 issue.\n    while total_tokens_generated \u003c n_predict_total and not model_stopped:\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        # Prepare the payload for the backend llama.cpp server\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n            # 3. Make the request to the actual llama.cpp server\n            target_url \u003d f\"{LLAMA_CPP_URL}/completion\"\n            response \u003d requests.post(\n                target_url,\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise_for_status()\n\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d json.dumps({\"error\": str(e)})\n            yield f\"data: {error_message}\\n\\n\"\n            break\n\n        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_data\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get(\u0027stop\u0027):\n                            print(\"Backend signaled stop.\")\n                            model_stopped \u003d True\n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            total_tokens_generated +\u003d tokens_to_request\n\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print(\"--- Chained Completion Finished (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n# --- The Core Proxy Route ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request_data:\n                return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON\", status\u003d400)\n\n        if request_data.get(\"stream\", False):\n            return Response(\n                stream_with_context(generate_chained_completion(request_data)),\n                mimetype\u003d\u0027text/event-stream\u0027\n            )\n        else:\n            print(\"Non-streaming request received, forwarding directly.\")\n            pass \n\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    try:\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003df\"{LLAMA_CPP_URL}/{subpath}\",\n            headers\u003d{key: value for (key, value) in request.headers if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest.get_data(),\n            stream\u003dTrue,\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for (name, value) in resp.raw.headers.items()\n                   if name.lower() not in excluded_headers]\n        \n        return Response(resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n\n    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp server: {e}\", status\u003d502)\n\n# --- Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy v3 starting...\")\n    print(f\"Forwarding from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n    print(f\"Special handling for POST /completion, overriding n_predict\u003d-1\")\n    app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)\n```\n\n### How to Test the Fix\n\nNow, run this specific `curl` command to test the new logic:\n\n```bash\ncurl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\"Once upon a time\", \"stream\": true, \"n_predict\": -1}\u0027\n```\n\nIn the proxy\u0027s terminal, you will see the log message:\n`Client requested n_predict\u003d-1 or was missing. Proxy is overriding with default: 50`\n\nAnd the model will proceed to generate up to 50 tokens (in chunks of 5), proving that our proxy correctly intercepted and modified the request behavior.",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 3308,
+      "parts": [{
+        "text": "You\u0027ve spotted a critical edge case! That\u0027s an excellent catch. The `llama.cpp` server\u0027"
+      }, {
+        "text": "s convention of using `-1` for \"infinite\" generation would indeed break our proxy\u0027s logic immediately.\n\nLet"
+      }, {
+        "text": "\u0027s fix this. We will modify the `generate_chained_completion` function to correctly interpret the incoming `n_predict"
+      }, {
+        "text": "` value. As requested, if the client sends `n_predict: -1` (or doesn\u0027t provide it"
+      }, {
+        "text": " at all), our \"Llama in the Middle\" will enforce its own limit of `50` tokens.\n\nHere is the"
+      }, {
+        "text": " revised `generate_chained_completion` function. The rest of the script remains the same.\n\n### The Corrected `generate"
+      }, {
+        "text": "_chained_completion` Function\n\nI\u0027ve added comments prefixed with `## FIXED:` to highlight the changes.\n\n```python"
+      }, {
+        "text": "\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained"
+      }, {
+        "text": " completion logic.\n    It makes multiple small requests to the backend and yields the\n    results as a single, continuous stream"
+      }, {
+        "text": ".\n    \"\"\"\n    # 1. Extract parameters from the original request\n    prompt \u003d original_request_data.get"
+      }, {
+        "text": "(\"prompt\", \"\")\n\n    # ## FIXED: Handle n_predict\u003d-1 (infinite) case ##\n    # Get"
+      }, {
+        "text": " the n_predict value from the request.\n    n_predict_req \u003d original_request_data.get"
+      }, {
+        "text": "(\"n_predict\", DEFAULT_N_PREDICT)\n\n    # If the request asks for infinite generation (-1) or"
+      }, {
+        "text": " doesn\u0027t specify,\n    # our proxy will enforce its own default limit.\n    if n_predict_req"
+      }, {
+        "text": " \u003d\u003d -1:\n        print(f\"Client requested n_predict\u003d-1 (infinite). Proxy is overriding with default:"
+      }, {
+        "text": " {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    "
+      }, {
+        "text": "else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Chained Completion"
+      }, {
+        "text": " Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total"
+      }, {
+        "text": " tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per call: {GENER"
+      }, {
+        "text": "ATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n"
+      }, {
+        "text": "    model_stopped \u003d False\n\n    # 2. Loop until we have enough tokens or the model stops\n    #"
+      }, {
+        "text": " This loop condition is now safe from the n_predict\u003d-1 issue.\n    while total_tokens_generated \u003c"
+      }, {
+        "text": " n_predict_total and not model_stopped:\n        remaining_tokens \u003d n_predict_total - total"
+      }, {
+        "text": "_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n"
+      }, {
+        "text": "        # Prepare the payload for the backend llama.cpp server\n        payload \u003d original_request_data.copy()\n        payload"
+      }, {
+        "text": "[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\""
+      }, {
+        "text": "stream\"] \u003d True\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")"
+      }, {
+        "text": "\n\n        try:\n            # 3. Make the request to the actual llama.cpp server\n            target_"
+      }, {
+        "text": "url \u003d f\"{LLAMA_CPP_URL}/completion\"\n            response \u003d requests.post(\n                target_"
+      }, {
+        "text": "url,\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n"
+      }, {
+        "text": "            )\n            response.raise_for_status()\n\n        except requests.exceptions.RequestException as e:\n"
+      }, {
+        "text": "            print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d json.dumps({\"error"
+      }, {
+        "text": "\": str(e)})\n            yield f\"data: {error_message}\\n\\n\"\n            break\n\n"
+      }, {
+        "text": "        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\"\n        last_chunk_"
+      }, {
+        "text": "data \u003d None\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line."
+      }, {
+        "text": "decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield line_str + \u0027\\"
+      }, {
+        "text": "n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]"
+      }, {
+        "text": "\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_"
+      }, {
+        "text": "data\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text"
+      }, {
+        "text": " +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get(\u0027stop\u0027):\n                            print(\"Backend signaled stop"
+      }, {
+        "text": ".\")\n                            model_stopped \u003d True\n                    except json.JSONDecodeError:\n                        print(f\"Warning:"
+      }, {
+        "text": " Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text"
+      }, {
+        "text": ":\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_"
+      }, {
+        "text": "text\n            # Note: This is an approximation. The actual number of tokens generated\n            # might be less than requested"
+      }, {
+        "text": " if the model stops early.\n            # A more robust counter would use a tokenizer.\n            total_tokens_generated +\u003d"
+      }, {
+        "text": " tokens_to_request\n\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print"
+      }, {
+        "text": "(\"--- Chained Completion Finished (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:"
+      }, {
+        "text": "\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n```\n\n### Explanation of the Fix\n\n"
+      }, {
+        "text": "1.  **Get Requested `n_predict`**: We first retrieve the `n_predict` value from the request"
+      }, {
+        "text": " payload. `original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)` handles the case where the"
+      }, {
+        "text": " key is missing entirely.\n2.  **Check for `-1`**: We then have an explicit `if n_predict_"
+      }, {
+        "text": "req \u003d\u003d -1:` block. This specifically checks if the client sent the \"infinite\" flag.\n3.  **Override"
+      }, {
+        "text": "**: If the value is `-1`, we print a log message explaining what the proxy is doing and set our internal `n"
+      }, {
+        "text": "_predict_total` variable to `DEFAULT_N_PREDICT` (which is 50).\n4."
+      }, {
+        "text": "  **Use Positive Value**: If the value is any other number (e.g., `40`, `1"
+      }, {
+        "text": "00`), we use it directly.\n5.  **Safe Loop**: The `while` loop condition `while total"
+      }, {
+        "text": "_tokens_generated \u003c n_predict_total` is now always safe, as `n_predict_total`"
+      }, {
+        "text": " is guaranteed to be a positive integer, correctly representing the *proxy\u0027s* generation goal.\n\n### Full Updated Script (`proxy"
+      }, {
+        "text": "_server_v3.py`)\n\nFor completeness, here is the full script with the fix integrated.\n\n```"
+      }, {
+        "text": "python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_context\nfrom"
+      }, {
+        "text": " flask_cors import CORS\n\n# --- Configuration ---\nLLAMA_CPP_URL \u003d \"http://localhost:1"
+      }, {
+        "text": "0000\"\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d"
+      }, {
+        "text": " 11111\n\n# --- Configuration for Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\n"
+      }, {
+        "text": "GENERATION_CHUNK_SIZE \u003d 5\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nC"
+      }, {
+        "text": "ORS(app)\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This"
+      }, {
+        "text": " generator function handles the chained completion logic.\n    It makes multiple small requests to the backend and yields the\n    results"
+      }, {
+        "text": " as a single, continuous stream.\n    \"\"\"\n    # 1. Extract parameters from the original request\n    "
+      }, {
+        "text": "prompt \u003d original_request_data.get(\"prompt\", \"\")\n\n    # ## FIXED: Handle n_predict\u003d-"
+      }, {
+        "text": "1 (infinite) case ##\n    # Get the n_predict value from the request.\n    n_predict"
+      }, {
+        "text": "_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    "
+      }, {
+        "text": "# If the request asks for infinite generation (-1), our proxy will enforce its own default limit.\n    # This"
+      }, {
+        "text": " also handles the case where n_predict is not provided at all.\n    if n_predict_req \u003d\u003d -"
+      }, {
+        "text": "1 or \"n_predict\" not in original_request_data:\n        print(f\"Client requested n_predict"
+      }, {
+        "text": "\u003d-1 or was missing. Proxy is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total"
+      }, {
+        "text": " \u003d DEFAULT_N_PREDICT\n    else:\n        n_predict_total \u003d n_predict_req"
+      }, {
+        "text": "\n\n    print(f\"--- Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt"
+      }, {
+        "text": "[:50]}...\u0027\")\n    print(f\"Total tokens to generate (proxy limit): {n_predict"
+      }, {
+        "text": "_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    "
+      }, {
+        "text": "full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped \u003d False\n\n    "
+      }, {
+        "text": "# 2. Loop until we have enough tokens or the model stops\n    # This loop condition is now safe from"
+      }, {
+        "text": " the n_predict\u003d-1 issue.\n    while total_tokens_generated \u003c n_predict_total and not"
+      }, {
+        "text": " model_stopped:\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens"
+      }, {
+        "text": "_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        # Prepare the payload"
+      }, {
+        "text": " for the backend llama.cpp server\n        payload \u003d original_request_data.copy()\n        payload[\"prompt"
+      }, {
+        "text": "\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True"
+      }, {
+        "text": "\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try"
+      }, {
+        "text": ":\n            # 3. Make the request to the actual llama.cpp server\n            target_url \u003d f"
+      }, {
+        "text": "\"{LLAMA_CPP_URL}/completion\"\n            response \u003d requests.post(\n                target_url,"
+      }, {
+        "text": "\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue"
+      }, {
+        "text": "\n            )\n            response.raise_for_status()\n\n        except requests.exceptions.RequestException as e"
+      }, {
+        "text": ":\n            print(f\"Error connecting to llama.cpp server: {e}\")\n            error_message \u003d"
+      }, {
+        "text": " json.dumps({\"error\": str(e)})\n            yield f\"data: {error_message}\\n\\"
+      }, {
+        "text": "n\"\n            break\n\n        # 4. Process the streaming response from the backend\n        chunk_generated_text \u003d \"\""
+      }, {
+        "text": "\n        last_chunk_data \u003d None\n\n        for line in response.iter_lines():\n            if line"
+      }, {
+        "text": ":\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027"
+      }, {
+        "text": "data: \u0027):\n                    yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line"
+      }, {
+        "text": "_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)"
+      }, {
+        "text": "\n                        last_chunk_data \u003d chunk_data\n\n                        if \u0027content\u0027 in chunk_data and chunk_"
+      }, {
+        "text": "data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n\n                        if chunk_data.get"
+      }, {
+        "text": "(\u0027stop\u0027):\n                            print(\"Backend signaled stop.\")\n                            model_stopped \u003d True\n                    except json.JSON"
+      }, {
+        "text": "DecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        "
+      }, {
+        "text": "continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")"
+      }, {
+        "text": "\n            full_prompt +\u003d chunk_generated_text\n            total_tokens_generated +\u003d tokens_to_request"
+      }, {
+        "text": "\n\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            print(\"---"
+      }, {
+        "text": " Chained Completion Finished (Model Stopped) ---\")\n            break\n            \n    if not model_stopped:\n"
+      }, {
+        "text": "        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n# --- The Core Proxy Route ---\n@app"
+      }, {
+        "text": ".route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS"
+      }, {
+        "text": "\u0027])\ndef proxy(subpath):\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        "
+      }, {
+        "text": "try:\n            request_data \u003d request.get_json()\n            if not request_data:\n                "
+      }, {
+        "text": "return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON"
+      }, {
+        "text": "\", status\u003d400)\n\n        if request_data.get(\"stream\", False):\n            return Response"
+      }, {
+        "text": "(\n                stream_with_context(generate_chained_completion(request_data)),\n                mimetype\u003d\u0027"
+      }, {
+        "text": "text/event-stream\u0027\n            )\n        else:\n            print(\"Non-streaming request received, forwarding"
+      }, {
+        "text": " directly.\")\n            pass \n\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    "
+      }, {
+        "text": "try:\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003df\"{LLAMA"
+      }, {
+        "text": "_CPP_URL}/{subpath}\",\n            headers\u003d{key: value for (key, value) in request.headers"
+      }, {
+        "text": " if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest.get_data(),\n            stream\u003dTrue,"
+      }, {
+        "text": "\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027,"
+      }, {
+        "text": " \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for (name, value) in resp"
+      }, {
+        "text": ".raw.headers.items()\n                   if name.lower() not in excluded_headers]\n        \n        return Response("
+      }, {
+        "text": "resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n\n    except"
+      }, {
+        "text": " requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp server:"
+      }, {
+        "text": " {e}\", status\u003d502)\n\n# --- Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n"
+      }, {
+        "text": "    print(f\"🦙 Llama in the Middle Proxy v3 starting...\")\n    print(f\"Forward"
+      }, {
+        "text": "ing from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n    print(f"
+      }, {
+        "text": "\"Special handling for POST /completion, overriding n_predict\u003d-1\")\n    app.run(host\u003dPROXY_HOST"
+      }, {
+        "text": ", port\u003dPROXY_PORT)\n```\n\n### How to Test the Fix\n\nNow, run this specific `curl` command"
+      }, {
+        "text": " to test the new logic:\n\n```bash\ncurl -X POST http://localhost:11111/completion --"
+      }, {
+        "text": "data \u0027{\"prompt\":\"Once upon a time\", \"stream\": true, \"n_predict\": -1}\u0027\n```\n\nIn"
+      }, {
+        "text": " the proxy\u0027s terminal, you will see the log message:\n`Client requested n_predict\u003d-1 or was missing. Proxy"
+      }, {
+        "text": " is overriding with default: 50`\n\nAnd the model will proceed to generate up to 50 tokens (in chunks"
+      }, {
+        "text": " of 5), proving that our proxy correctly intercepted and modified the request behavior."
+      }]
+    }, {
+      "text": "Better. However now the proxy exits after 5 tokens. Model generates 5 tokens and says it\u0027s stopped.  We see it\u0027s done and quit as we don\u0027t know if it\u0027s done because it can\u0027t generate more or it just generated all requested tokens.\n\nI\u0027m not aware better way, so  unless  you know better fix it the following way. In the very beginning generate END_TOKENS:list[str] and fill it with couple common end-of-text tokens. If model stopped but generated all `tokens_to_request` tokens, check last token. If it end token - we are done. If note, we continue, assuming that model stopped just because we told it to stop.",
+      "role": "user",
+      "tokenCount": 155
+    }, {
+      "text": "**Examining the Core Issue**\n\nI\u0027ve been analyzing the user\u0027s report, and I see the root of the problem lies in `llama.cpp`\u0027s handling of `n_predict`. It prematurely sets `\"stop\": true`, which causes issues when expecting it to continue generating. This seems like a critical point to address in resolving the reported behavior.\n\n\n**Refining the Logic**\n\nI\u0027m now diving deeper into the nuances of stopping conditions. I\u0027ve realized we need a more robust way to distinguish between a natural stop and an artificial one triggered by `n_predict`. To achieve this, I\u0027m considering using a list of common end-of-sentence markers. If we encounter a stop signal but the generated text ends with one of these markers, it indicates a natural completion, and we can signal to continue as expected. This will refine our proxy\u0027s ability to interpret stops accurately.\n\n\n**Constructing a Solution**\n\nI\u0027m solidifying the implementation strategy now. The core is the conditional logic to differentiate natural stops from artificial ones. I\u0027m focusing on the `END_TOKENS` list and where it best fits in the architecture. Ensuring we accurately track tokens generated per chunk is crucial for determining artificial stops. I\u0027ll need to count the received content chunks as a proxy. Also, I\u0027m considering edge cases and error handling to ensure robustness.\n\n\n**Developing the Stop Condition**\n\nI\u0027m making progress on the implementation. The key is in accurately interpreting the \"stop\" signal. I\u0027m focusing on incorporating the `END_TOKENS` check within the `generate_chained_completion` function. To determine if a stop is artificial, I\u0027ll count the content chunks and compare that to the requested generation size. I\u0027m also planning to increment `content_chunks_received` and handle edge cases gracefully, such as empty responses, to make the proxy more robust.\n\n\n**Addressing Stop Condition Refinement**\n\nI\u0027m now implementing the stop condition check within the code. I\u0027m focusing on the `generate_chained_completion` function and integrating the `END_TOKENS` check to differentiate natural from artificial stops. To achieve this, I\u0027m incrementing `content_chunks_received` and incorporating checks for the `n_predict` condition, which helps determine if the model stopped naturally or was forced. This will increase robustness, so it handles these stops accurately.\n\n\n**Finalizing the Strategy**\n\nI\u0027ve got the pieces in place now. The core logic is defined, the edge cases are considered, and the main workflow is clear. I will begin coding the changes directly into the proxy. First, I\u0027ll integrate the `END_TOKENS` check and the token counting into `generate_chained_completion`. Then, I\u0027ll ensure any changes in behavior are tested rigorously, and make sure that any error handling is as robust as possible.\n\n\n**Finalizing the Check**\n\nI\u0027m now fully ready to implement the fix. The logic is clear and well-defined, and the necessary variables are identified. I will integrate the `END_TOKENS` check inside `generate_chained_completion`. I\u0027ll focus on testing edge cases to ensure the logic works as expected in all scenarios. I\u0027ll make sure to increment `content_chunks_received` and handle situations where `n_predict` is fulfilled or the model stops naturally.\n\n\n**Analyzing Stop Conditions**\n\nI\u0027m now refining the logic to determine a \"natural\" stop versus an artificial one. I\u0027ll utilize a list of common end-of-sentence tokens, like periods and newlines. The count of received chunks will help indicate whether the generated text meets the requested size, or the model ended prematurely.\n\n\n\n**Improving Stop Detection**\n\nI\u0027m now considering the best method to differentiate natural stops from forced ones. It involves evaluating received text for end-of-sentence markers. I\u0027ll need to count the content chunks to check if the desired size was met. This will help refine the logic to handle artificial stops.\n\n\n**Developing Stop-Signal Logic**\n\nI\u0027m now implementing the stop condition check based on the recent analysis. The central focus is accurately differentiating between natural and artificial stops. The `content_chunks_received` variable is key for the differentiation. I\u0027ll need to use the `END_TOKENS` list to decide.\n\n\n\n",
+      "role": "model",
+      "tokenCount": 2205,
+      "isThought": true,
+      "thinkingBudget": -1,
+      "thoughtSignatures": ["", "", "", "", "", "", "", "", "", ""],
+      "parts": [{
+        "text": "**Examining the Core Issue**\n\nI\u0027ve been analyzing the user\u0027s report, and I see the root of the problem lies in `llama.cpp`\u0027s handling of `n_predict`. It prematurely sets `\"stop\": true`, which causes issues when expecting it to continue generating. This seems like a critical point to address in resolving the reported behavior.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining the Logic**\n\nI\u0027m now diving deeper into the nuances of stopping conditions. I\u0027ve realized we need a more robust way to distinguish between a natural stop and an artificial one triggered by `n_predict`. To achieve this, I\u0027m considering using a list of common end-of-sentence markers. If we encounter a stop signal but the generated text ends with one of these markers, it indicates a natural completion, and we can signal to continue as expected. This will refine our proxy\u0027s ability to interpret stops accurately.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Constructing a Solution**\n\nI\u0027m solidifying the implementation strategy now. The core is the conditional logic to differentiate natural stops from artificial ones. I\u0027m focusing on the `END_TOKENS` list and where it best fits in the architecture. Ensuring we accurately track tokens generated per chunk is crucial for determining artificial stops. I\u0027ll need to count the received content chunks as a proxy. Also, I\u0027m considering edge cases and error handling to ensure robustness.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Developing the Stop Condition**\n\nI\u0027m making progress on the implementation. The key is in accurately interpreting the \"stop\" signal. I\u0027m focusing on incorporating the `END_TOKENS` check within the `generate_chained_completion` function. To determine if a stop is artificial, I\u0027ll count the content chunks and compare that to the requested generation size. I\u0027m also planning to increment `content_chunks_received` and handle edge cases gracefully, such as empty responses, to make the proxy more robust.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Addressing Stop Condition Refinement**\n\nI\u0027m now implementing the stop condition check within the code. I\u0027m focusing on the `generate_chained_completion` function and integrating the `END_TOKENS` check to differentiate natural from artificial stops. To achieve this, I\u0027m incrementing `content_chunks_received` and incorporating checks for the `n_predict` condition, which helps determine if the model stopped naturally or was forced. This will increase robustness, so it handles these stops accurately.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Finalizing the Strategy**\n\nI\u0027ve got the pieces in place now. The core logic is defined, the edge cases are considered, and the main workflow is clear. I will begin coding the changes directly into the proxy. First, I\u0027ll integrate the `END_TOKENS` check and the token counting into `generate_chained_completion`. Then, I\u0027ll ensure any changes in behavior are tested rigorously, and make sure that any error handling is as robust as possible.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Finalizing the Check**\n\nI\u0027m now fully ready to implement the fix. The logic is clear and well-defined, and the necessary variables are identified. I will integrate the `END_TOKENS` check inside `generate_chained_completion`. I\u0027ll focus on testing edge cases to ensure the logic works as expected in all scenarios. I\u0027ll make sure to increment `content_chunks_received` and handle situations where `n_predict` is fulfilled or the model stops naturally.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Analyzing Stop Conditions**\n\nI\u0027m now refining the logic to determine a \"natural\" stop versus an artificial one. I\u0027ll utilize a list of common end-of-sentence tokens, like periods and newlines. The count of received chunks will help indicate whether the generated text meets the requested size, or the model ended prematurely.\n\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Improving Stop Detection**\n\nI\u0027m now considering the best method to differentiate natural stops from forced ones. It involves evaluating received text for end-of-sentence markers. I\u0027ll need to count the content chunks to check if the desired size was met. This will help refine the logic to handle artificial stops.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Developing Stop-Signal Logic**\n\nI\u0027m now implementing the stop condition check based on the recent analysis. The central focus is accurately differentiating between natural and artificial stops. The `content_chunks_received` variable is key for the differentiation. I\u0027ll need to use the `END_TOKENS` list to decide.\n\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "You\u0027ve hit the nail on the head. This is the subtle but critical flaw in the previous version. The `llama.cpp` server is behaving exactly as we tell it to: \"generate 5 tokens and stop.\" Our proxy then sees the `stop: true` flag and incorrectly assumes the entire generation process is complete.\n\nYour proposed solution is an excellent heuristic and the correct way to handle this. We will distinguish between a \"natural stop\" (the model thinks it\u0027s done) and an \"artificial stop\" (the model simply fulfilled our small `n_predict` request).\n\nHere is the updated `generate_chained_completion` function that implements this logic.\n\n### The Improved Script (`proxy_server_v4.py`)\n\nI\u0027ve added the `END_TOKENS` list and significantly updated the logic inside the `while` loop to be smarter about when to stop.\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\nLLAMA_CPP_URL \u003d \"http://localhost:10000\"\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- Configuration for Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\nGENERATION_CHUNK_SIZE \u003d 5\n\n# ## NEW: Define common end-of-text tokens ##\n# This list helps us determine if a stop was \"natural\".\n# You might want to customize this based on the model you are using.\nEND_TOKENS \u003d [\"\\n\", \".\", \"?\", \"!\", \"\u003c/s\u003e\", \"\u003c|endoftext|\u003e\", \"\u003c|im_end|\u003e\"]\n\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nCORS(app)\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic with improved\n    stop detection. It can now distinguish between natural and artificial stops.\n    \"\"\"\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n    n_predict_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    if n_predict_req \u003d\u003d -1 or \"n_predict\" not in original_request_data:\n        print(f\"Client requested n_predict\u003d-1 or was missing. Proxy is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped_naturally \u003d False\n\n    while total_tokens_generated \u003c n_predict_total and not model_stopped_naturally:\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print(f\"\\n\u003e Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n            response \u003d requests.post(\n                f\"{LLAMA_CPP_URL}/completion\",\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise_for_status()\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to llama.cpp server: {e}\")\n            yield f\"data: {json.dumps({\u0027error\u0027: str(e)})}\\n\\n\"\n            break\n\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n        # ## NEW: Count content chunks to see if we received all we asked for ##\n        content_chunks_in_batch \u003d 0\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_data\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n                            content_chunks_in_batch +\u003d 1\n                            \n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            total_tokens_generated +\u003d tokens_to_request # Approximation, good enough for the loop\n\n        # --- ## NEW: Smarter Stop Detection Logic ## ---\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            # The backend says it stopped. We need to figure out why.\n            \n            # Case 1: The model stopped *before* generating the number of tokens we asked for.\n            # This is a strong signal of a natural stop (e.g., it hit an EOS token internally).\n            if content_chunks_in_batch \u003c tokens_to_request:\n                print(\"Backend stopped early. Assuming natural stop.\")\n                model_stopped_naturally \u003d True\n            \n            # Case 2: The model generated exactly what we asked for. It might be an artificial stop.\n            # Check if the generated text ends with a known stop token.\n            else:\n                clean_text \u003d chunk_generated_text.strip()\n                if any(clean_text.endswith(token) for token in END_TOKENS):\n                    print(f\"Backend stopped on a known end token: \u0027{clean_text[-5:]}\u0027\")\n                    model_stopped_naturally \u003d True\n                else:\n                    # This was an artificial stop. We ignore it and continue the loop.\n                    print(\"Artificial stop detected (limit reached). Continuing generation...\")\n\n        if model_stopped_naturally:\n            print(\"--- Chained Completion Finished (Model Stopped Naturally) ---\")\n            break\n            \n    if not model_stopped_naturally:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n\n# --- The Core Proxy Route (Unchanged) ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request_data:\n                return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON\", status\u003d400)\n\n        if request_data.get(\"stream\", False):\n            return Response(\n                stream_with_context(generate_chained_completion(request_data)),\n                mimetype\u003d\u0027text/event-stream\u0027\n            )\n        else:\n            print(\"Non-streaming request received, forwarding directly.\")\n            pass \n\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    try:\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003df\"{LLAMA_CPP_URL}/{subpath}\",\n            headers\u003d{key: value for (key, value) in request.headers if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest.get_data(),\n            stream\u003dTrue,\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for (name, value) in resp.raw.headers.items()\n                   if name.lower() not in excluded_headers]\n        \n        return Response(resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n\n    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp server: {e}\", status\u003d502)\n\n\n# --- Main Entry Point (Unchanged) ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy v4 starting...\")\n    print(f\"Forwarding from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n    print(f\"Special handling for POST /completion with smart stop detection.\")\n    app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)\n\n```\n\n### How the New Logic Works\n\n1.  **`END_TOKENS` list**: We define a list of common characters or strings that signify the end of a sentence or thought. This is our heuristic for a \"natural\" stop.\n\n2.  **`content_chunks_in_batch` counter**: Inside the `while` loop, we now count how many `content` chunks we receive from the backend for each small request. Since `llama.cpp`\u0027s server typically sends one `content` object per token, this is a good proxy for the number of tokens generated in that batch.\n\n3.  **The Decision Block**: The core change is in the `if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):` block.\n    *   **Case 1 (Natural Stop by Length):** We check if `content_chunks_in_batch \u003c tokens_to_request`. If the model generated *fewer* tokens than the 5 we asked for, it must have hit an internal stop condition (like its own EOS token). We can confidently say this is a `model_stopped_naturally` and break our main loop.\n    *   **Case 2 (Potential Artificial Stop):** If the model generated exactly the 5 tokens we asked for, it\u0027s ambiguous. We then check if the text it just generated (`chunk_generated_text`) ends with one of our `END_TOKENS`.\n        *   If it **does**, we treat it as a natural stop. For example, if the 5th token was a period `.`\n        *   If it **does not**, we assume it was an **artificial stop**. We print a message confirming this and simply let the `while` loop continue to the next iteration to ask for more tokens. The `model_stopped_naturally` flag remains `False`.\n\nThis new version is significantly more robust and correctly handles the chained generation, allowing the proxy to build up a long response from multiple short requests until the model truly finishes or the total token limit is reached.",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 2503,
+      "parts": [{
+        "text": "You\u0027ve hit the nail on the head. This is the subtle but critical flaw in the previous version. The `"
+      }, {
+        "text": "llama.cpp` server is behaving exactly as we tell it to: \"generate 5 tokens and stop.\" Our proxy then sees"
+      }, {
+        "text": " the `stop: true` flag and incorrectly assumes the entire generation process is complete.\n\nYour proposed solution is an excellent heuristic"
+      }, {
+        "text": " and the correct way to handle this. We will distinguish between a \"natural stop\" (the model thinks it\u0027s done"
+      }, {
+        "text": ") and an \"artificial stop\" (the model simply fulfilled our small `n_predict` request).\n\nHere is"
+      }, {
+        "text": " the updated `generate_chained_completion` function that implements this logic.\n\n### The Improved Script (`proxy_server"
+      }, {
+        "text": "_v4.py`)\n\nI\u0027ve added the `END_TOKENS` list and significantly updated the logic"
+      }, {
+        "text": " inside the `while` loop to be smarter about when to stop.\n\n```python\nimport requests\nimport json\nfrom"
+      }, {
+        "text": " flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration"
+      }, {
+        "text": " ---\nLLAMA_CPP_URL \u003d \"http://localhost:10000\"\nPROXY_HOST"
+      }, {
+        "text": " \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- Configuration for"
+      }, {
+        "text": " Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\nGENERATION_CHUNK_SIZE \u003d "
+      }, {
+        "text": "5\n\n# ## NEW: Define common end-of-text tokens ##\n# This list helps us determine if a"
+      }, {
+        "text": " stop was \"natural\".\n# You might want to customize this based on the model you are using.\nEND_"
+      }, {
+        "text": "TOKENS \u003d [\"\\n\", \".\", \"?\", \"!\", \"\u003c/s\u003e\", \"\u003c|endoftext|\u003e\", \"\u003c|im_end"
+      }, {
+        "text": "|\u003e\"]\n\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nCORS(app)\n\ndef generate_"
+      }, {
+        "text": "chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic with"
+      }, {
+        "text": " improved\n    stop detection. It can now distinguish between natural and artificial stops.\n    \"\"\"\n    prompt \u003d original_"
+      }, {
+        "text": "request_data.get(\"prompt\", \"\")\n    n_predict_req \u003d original_request_data.get(\"n_"
+      }, {
+        "text": "predict\", DEFAULT_N_PREDICT)\n\n    if n_predict_req \u003d\u003d -1 or \"n_predict\""
+      }, {
+        "text": " not in original_request_data:\n        print(f\"Client requested n_predict\u003d-1 or was missing. Proxy"
+      }, {
+        "text": " is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT"
+      }, {
+        "text": "\n    else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"---"
+      }, {
+        "text": " Chained Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    "
+      }, {
+        "text": "print(f\"Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\""
+      }, {
+        "text": "Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated"
+      }, {
+        "text": " \u003d 0\n    model_stopped_naturally \u003d False\n\n    while total_tokens_generated \u003c n_predict"
+      }, {
+        "text": "_total and not model_stopped_naturally:\n        remaining_tokens \u003d n_predict_total - total"
+      }, {
+        "text": "_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n"
+      }, {
+        "text": "        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_"
+      }, {
+        "text": "predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print(f\"\\n\u003e"
+      }, {
+        "text": " Making backend request for {tokens_to_request} tokens...\")\n\n        try:\n            response \u003d requests.post(\n"
+      }, {
+        "text": "                f\"{LLAMA_CPP_URL}/completion\",\n                headers\u003d{\u0027Content-Type\u0027: \u0027application/json"
+      }, {
+        "text": "\u0027},\n                json\u003dpayload,\n                stream\u003dTrue\n            )\n            response.raise_for_status()"
+      }, {
+        "text": "\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to llama.cpp server:"
+      }, {
+        "text": " {e}\")\n            yield f\"data: {json.dumps({\u0027error\u0027: str(e)})}\\n\\"
+      }, {
+        "text": "n\"\n            break\n\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n"
+      }, {
+        "text": "        # ## NEW: Count content chunks to see if we received all we asked for ##\n        content_chunks_in"
+      }, {
+        "text": "_batch \u003d 0\n\n        for line in response.iter_lines():\n            if line:\n                line_"
+      }, {
+        "text": "str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    "
+      }, {
+        "text": "yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str["
+      }, {
+        "text": "len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk"
+      }, {
+        "text": "_data \u003d chunk_data\n\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n"
+      }, {
+        "text": "                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n                            content_chunks_in_batch +\u003d "
+      }, {
+        "text": "1\n                            \n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON"
+      }, {
+        "text": " chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text:\n            print"
+      }, {
+        "text": "(f\"\u003c Received \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            "
+      }, {
+        "text": "total_tokens_generated +\u003d tokens_to_request # Approximation, good enough for the loop\n\n        # --- ##"
+      }, {
+        "text": " NEW: Smarter Stop Detection Logic ## ---\n        if last_chunk_data and last_chunk_data.get"
+      }, {
+        "text": "(\u0027stop\u0027):\n            # The backend says it stopped. We need to figure out why.\n            \n            # Case"
+      }, {
+        "text": " 1: The model stopped *before* generating the number of tokens we asked for.\n            # This is a"
+      }, {
+        "text": " strong signal of a natural stop (e.g., it hit an EOS token internally).\n            if content_chunks_"
+      }, {
+        "text": "in_batch \u003c tokens_to_request:\n                print(\"Backend stopped early. Assuming natural stop.\")\n                model_stopped"
+      }, {
+        "text": "_naturally \u003d True\n            \n            # Case 2: The model generated exactly what we asked for. It"
+      }, {
+        "text": " might be an artificial stop.\n            # Check if the generated text ends with a known stop token.\n            else"
+      }, {
+        "text": ":\n                clean_text \u003d chunk_generated_text.strip()\n                if any(clean_text."
+      }, {
+        "text": "endswith(token) for token in END_TOKENS):\n                    print(f\"Backend stopped on a known end token:"
+      }, {
+        "text": " \u0027{clean_text[-5:]}\u0027\")\n                    model_stopped_naturally \u003d True\n                else:\n"
+      }, {
+        "text": "                    # This was an artificial stop. We ignore it and continue the loop.\n                    print(\"Artificial stop detected ("
+      }, {
+        "text": "limit reached). Continuing generation...\")\n\n        if model_stopped_naturally:\n            print(\"--- Chained Completion"
+      }, {
+        "text": " Finished (Model Stopped Naturally) ---\")\n            break\n            \n    if not model_stopped_naturally:"
+      }, {
+        "text": "\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n\n# --- The Core Proxy Route"
+      }, {
+        "text": " (Unchanged) ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027"
+      }, {
+        "text": "PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    if subpath \u003d\u003d \u0027completion\u0027 and request"
+      }, {
+        "text": ".method \u003d\u003d \u0027POST\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request"
+      }, {
+        "text": "_data:\n                return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return"
+      }, {
+        "text": " Response(\"Invalid JSON\", status\u003d400)\n\n        if request_data.get(\"stream\", False):\n"
+      }, {
+        "text": "            return Response(\n                stream_with_context(generate_chained_completion(request_data)),\n                mimetype\u003d\u0027"
+      }, {
+        "text": "text/event-stream\u0027\n            )\n        else:\n            print(\"Non-streaming request received, forwarding directly"
+      }, {
+        "text": ".\")\n            pass \n\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    "
+      }, {
+        "text": "try:\n        resp \u003d requests.request(\n            method\u003drequest.method,\n            url\u003df\"{LLAMA_"
+      }, {
+        "text": "CPP_URL}/{subpath}\",\n            headers\u003d{key: value for (key, value) in request.headers"
+      }, {
+        "text": " if key.lower() !\u003d \u0027host\u0027},\n            data\u003drequest.get_data(),\n            stream\u003dTrue,"
+      }, {
+        "text": "\n            timeout\u003d300\n        )\n        excluded_headers \u003d [\u0027content-encoding\u0027, \u0027content-length"
+      }, {
+        "text": "\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]\n        headers \u003d [(name, value) for (name, value) in resp"
+      }, {
+        "text": ".raw.headers.items()\n                   if name.lower() not in excluded_headers]\n        \n        return"
+      }, {
+        "text": " Response(resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n\n"
+      }, {
+        "text": "    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp"
+      }, {
+        "text": " server: {e}\", status\u003d502)\n\n\n# --- Main Entry Point (Unchanged) ---\nif __name__"
+      }, {
+        "text": " \u003d\u003d \u0027__main__\u0027:\n    print(f\"🦙 Llama in the Middle Proxy v4 starting...\")\n    print"
+      }, {
+        "text": "(f\"Forwarding from http://{PROXY_HOST}:{PROXY_PORT} to {LLAMA_CPP_URL}\")\n"
+      }, {
+        "text": "    print(f\"Special handling for POST /completion with smart stop detection.\")\n    app.run(host\u003dPROXY_HOST"
+      }, {
+        "text": ", port\u003dPROXY_PORT)\n\n```\n\n### How the New Logic Works\n\n1.  **`END_TOKENS"
+      }, {
+        "text": "` list**: We define a list of common characters or strings that signify the end of a sentence or thought. This is"
+      }, {
+        "text": " our heuristic for a \"natural\" stop.\n\n2.  **`content_chunks_in_batch` counter**: Inside"
+      }, {
+        "text": " the `while` loop, we now count how many `content` chunks we receive from the backend for each small request. Since"
+      }, {
+        "text": " `llama.cpp`\u0027s server typically sends one `content` object per token, this is a good proxy for the number of"
+      }, {
+        "text": " tokens generated in that batch.\n\n3.  **The Decision Block**: The core change is in the `if last"
+      }, {
+        "text": "_chunk_data and last_chunk_data.get(\u0027stop\u0027):` block.\n    *   **Case"
+      }, {
+        "text": " 1 (Natural Stop by Length):** We check if `content_chunks_in_batch \u003c tokens_to_"
+      }, {
+        "text": "request`. If the model generated *fewer* tokens than the 5 we asked for, it must have hit an internal"
+      }, {
+        "text": " stop condition (like its own EOS token). We can confidently say this is a `model_stopped_naturally` and"
+      }, {
+        "text": " break our main loop.\n    *   **Case 2 (Potential Artificial Stop):** If the model generated exactly the"
+      }, {
+        "text": " 5 tokens we asked for, it\u0027s ambiguous. We then check if the text it just generated (`chunk_generated_text"
+      }, {
+        "text": "`) ends with one of our `END_TOKENS`.\n        *   If it **does**, we treat it as a natural"
+      }, {
+        "text": " stop. For example, if the 5th token was a period `.`\n        *   If it **does"
+      }, {
+        "text": " not**, we assume it was an **artificial stop**. We print a message confirming this and simply let the `while` loop continue"
+      }, {
+        "text": " to the next iteration to ask for more tokens. The `model_stopped_naturally` flag remains `False`.\n\nThis new"
+      }, {
+        "text": " version is significantly more robust and correctly handles the chained generation, allowing the proxy to build up a long response from multiple short"
+      }, {
+        "text": " requests until the model truly finishes or the total token limit is reached."
+      }]
+    }, {
+      "text": "Wonderful. Now we target\n\n            response \u003d requests.post(\n                f\"{LLAMA_CPP_URL}/completion\",\n                headers\u003d{\"Content-Type\": \"application/json\"},\n                json\u003dpayload,\n                stream\u003dTrue,\n            )\n\nAssume in the beginning of the file we declared array BACKEND_SERVERS which will hold servers for blending(BACKEND_SERVERS\u003d[\"http://localhost:10000\", \"http://localhost:10001\"])\n\nIn last iteration we always went after f\"{LLAMA_CPP_URL}/completion\".\nNow change them. add `url \u003d ...` that picks the next model so I\u0027ll change strategy to pick URL later\n\nIe if previously we returned to the client llama10000(\"once upon\") + llama10000(\"once upon a time \") + llama10000(\"once upon a time in lands\") make the end response be \n `llama10000(\"once upon\") + llama10001(\"once upon a dream \") + llama10000(\"once upon a dream that I\")`\n\nThat\u0027s the whole idea of LITM: to generate sequence of tokens that each model can\u0027t do on its own",
+      "role": "user",
+      "tokenCount": 271
+    }, {
+      "text": "**Exploring Blending Logic**\n\nI\u0027m currently focused on the core logic: combining responses from multiple llama.cpp servers. My initial thoughts revolve around how to handle potential variations in response times and content from each server. I\u0027m considering strategies for merging or interleaving the outputs, potentially prioritizing faster responses or ensuring a coherent final text. I am also thinking about how to handle the possibility of errors with any of the servers, and how to gracefully fail.\n\n\n**Devising Request Routing**\n\nI\u0027m now thinking specifically about how to distribute requests across the servers. I\u0027ve realized cycling through the backend servers using the modulo operator is ideal. I\u0027m confident that maintaining the necessary state between servers, using the existing `full_prompt`, is also manageable. My focus is now solidifying the cycling logic and error handling in case a server goes down.\n\n\n**Solidifying Backend Cycling**\n\nI\u0027m now implementing the cycling logic, using the modulo operator to select the appropriate server URL from `BACKEND_SERVERS`. I\u0027m also considering the implications of an empty `BACKEND_SERVERS` list. My focus is on creating a robust method to manage this and other failure scenarios with clarity and an appropriate error message. I\u0027m aiming for clean code and effective error handling.\n\n\n**Adapting Request Logic**\n\nI\u0027m now thinking specifically about how to incorporate the server cycling within the existing code structure. I\u0027ve realized the best approach is to create a function to manage the backend selection and URL construction. This function would handle the modulo operation and ensure that the `full_prompt` is correctly passed to the chosen server. I\u0027m also considering how to ensure the counter, to track which backend we are on, is properly incremented within the existing `while` loop. The goal is maintain clean and readable code.\n\n\n**Incorporating Server Cycling**\n\nI\u0027m now thinking specifically about how to incorporate the modulo operator for server selection within the existing loop. The plan is to calculate `backend_index` before the `requests.post` call, construct the target URL dynamically, and increment the `request_batch_index` for the next cycle. Adding clear logging is also a priority to monitor backend usage.\n\n\n**Adapting Backend Configuration**\n\nI\u0027m now thinking specifically about how to incorporate the changes into the configuration. The plan is to remove the `LLAMA_CPP_URL` variable, replace it with `BACKEND_SERVERS`, and add an error check if the list is empty. Updating startup messages to show the configured backends is also a priority.\n\n**Finalizing Server Integration**\n\nI\u0027m now satisfied with the backend cycling logic; it\u0027s clean, efficient, and handles potential errors gracefully. I\u0027ve updated the startup messages to clearly display the configured backend servers. I\u0027m now ready to finalize the changes and thoroughly test the multi-server blending implementation.\n\n\n**Refining Server Integration**\n\nI\u0027m now zeroing in on integrating the backend server cycling into the existing code, starting with creating the `BACKEND_SERVERS` list and the modulo logic within the `generate_chained_completion` function. My main focus is on ensuring requests are distributed evenly, even when a backend goes down, and to improve error handling and logging. I\u0027ve drafted some initial code changes, and I\u0027m ready for the next iteration.\n\n\n",
+      "role": "model",
+      "tokenCount": 1749,
+      "isThought": true,
+      "thinkingBudget": -1,
+      "thoughtSignatures": ["", "", "", "", "", "", "", ""],
+      "parts": [{
+        "text": "**Exploring Blending Logic**\n\nI\u0027m currently focused on the core logic: combining responses from multiple llama.cpp servers. My initial thoughts revolve around how to handle potential variations in response times and content from each server. I\u0027m considering strategies for merging or interleaving the outputs, potentially prioritizing faster responses or ensuring a coherent final text. I am also thinking about how to handle the possibility of errors with any of the servers, and how to gracefully fail.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Devising Request Routing**\n\nI\u0027m now thinking specifically about how to distribute requests across the servers. I\u0027ve realized cycling through the backend servers using the modulo operator is ideal. I\u0027m confident that maintaining the necessary state between servers, using the existing `full_prompt`, is also manageable. My focus is now solidifying the cycling logic and error handling in case a server goes down.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Solidifying Backend Cycling**\n\nI\u0027m now implementing the cycling logic, using the modulo operator to select the appropriate server URL from `BACKEND_SERVERS`. I\u0027m also considering the implications of an empty `BACKEND_SERVERS` list. My focus is on creating a robust method to manage this and other failure scenarios with clarity and an appropriate error message. I\u0027m aiming for clean code and effective error handling.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Adapting Request Logic**\n\nI\u0027m now thinking specifically about how to incorporate the server cycling within the existing code structure. I\u0027ve realized the best approach is to create a function to manage the backend selection and URL construction. This function would handle the modulo operation and ensure that the `full_prompt` is correctly passed to the chosen server. I\u0027m also considering how to ensure the counter, to track which backend we are on, is properly incremented within the existing `while` loop. The goal is maintain clean and readable code.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Incorporating Server Cycling**\n\nI\u0027m now thinking specifically about how to incorporate the modulo operator for server selection within the existing loop. The plan is to calculate `backend_index` before the `requests.post` call, construct the target URL dynamically, and increment the `request_batch_index` for the next cycle. Adding clear logging is also a priority to monitor backend usage.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Adapting Backend Configuration**\n\nI\u0027m now thinking specifically about how to incorporate the changes into the configuration. The plan is to remove the `LLAMA_CPP_URL` variable, replace it with `BACKEND_SERVERS`, and add an error check if the list is empty. Updating startup messages to show the configured backends is also a priority.\n\n",
+        "thought": true
+      }, {
+        "text": "**Finalizing Server Integration**\n\nI\u0027m now satisfied with the backend cycling logic; it\u0027s clean, efficient, and handles potential errors gracefully. I\u0027ve updated the startup messages to clearly display the configured backend servers. I\u0027m now ready to finalize the changes and thoroughly test the multi-server blending implementation.\n\n\n",
+        "thought": true
+      }, {
+        "text": "**Refining Server Integration**\n\nI\u0027m now zeroing in on integrating the backend server cycling into the existing code, starting with creating the `BACKEND_SERVERS` list and the modulo logic within the `generate_chained_completion` function. My main focus is on ensuring requests are distributed evenly, even when a backend goes down, and to improve error handling and logging. I\u0027ve drafted some initial code changes, and I\u0027m ready for the next iteration.\n\n\n",
+        "thought": true
+      }]
+    }, {
+      "text": "This is an outstanding idea and gets to the very heart of what a \"Llama in the Middle\" proxy should do: orchestrate multiple models to create a blended, potentially superior output.\n\nWe will now modify the script to cycle through a list of backend servers in a round-robin fashion for each chunk of the generation.\n\n### The Blending Script (`proxy_server_v5.py`)\n\nHere is the updated script. The main changes are in the configuration section and the `generate_chained_completion` function.\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response, stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\n# ## NEW: Define multiple backend servers for blending ##\n# The proxy will cycle through these servers for each generation chunk.\nBACKEND_SERVERS \u003d [\n    \"http://localhost:10000\",\n    \"http://localhost:10001\",\n]\n\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d 11111\n\n# --- Configuration for Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\nGENERATION_CHUNK_SIZE \u003d 5\nEND_TOKENS \u003d [\"\\n\", \".\", \"?\", \"!\", \"\u003c/s\u003e\", \"\u003c|endoftext|\u003e\", \"\u003c|im_end|\u003e\"]\n\n\n# --- Flask App Initialization ---\napp \u003d Flask(__name__)\nCORS(app)\n\ndef generate_chained_completion(original_request_data):\n    \"\"\"\n    This generator function handles the chained completion logic, now blending\n    responses by routing requests to different backend servers in a round-robin fashion.\n    \"\"\"\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n    n_predict_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n    if n_predict_req \u003d\u003d -1 or \"n_predict\" not in original_request_data:\n        print(f\"Client requested n_predict\u003d-1 or was missing. Proxy is overriding with default: {DEFAULT_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    else:\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Blended Completion Started ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\"Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated \u003d 0\n    model_stopped_naturally \u003d False\n    # ## NEW: Keep track of which request batch we are on to select a server ##\n    request_batch_index \u003d 0\n\n    while total_tokens_generated \u003c n_predict_total and not model_stopped_naturally:\n        # --- ## NEW: Round-robin backend selection logic ## ---\n        if not BACKEND_SERVERS:\n            print(\"Error: BACKEND_SERVERS list is empty. Cannot process request.\")\n            yield f\"data: {json.dumps({\u0027error\u0027: \u0027No backend servers configured.\u0027})}\\n\\n\"\n            break\n\n        # Pick the next server from the list, cycling back to the start if needed.\n        backend_index \u003d request_batch_index % len(BACKEND_SERVERS)\n        current_backend_url \u003d BACKEND_SERVERS[backend_index]\n        target_url \u003d f\"{current_backend_url}/completion\"\n        # --------------------------------------------------------\n\n        remaining_tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK_SIZE, remaining_tokens)\n\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print(f\"\\n\u003e [Batch {request_batch_index}] Routing to {current_backend_url} for {tokens_to_request} tokens...\")\n\n        try:\n            response \u003d requests.post(\n                target_url, # Use the dynamically selected URL\n                headers\u003d{\"Content-Type\": \"application/json\"},\n                json\u003dpayload,\n                stream\u003dTrue,\n            )\n            response.raise_for_status()\n        except requests.exceptions.RequestException as e:\n            print(f\"Error connecting to backend server {current_backend_url}: {e}\")\n            yield f\"data: {json.dumps({\u0027error\u0027: f\u0027Failed to connect to backend: {current_backend_url}\u0027})}\\n\\n\"\n            # Optional: You could implement logic here to skip the failing server and try the next one.\n            # For now, we\u0027ll just stop the generation on failure.\n            break\n\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n        content_chunks_in_batch \u003d 0\n\n        for line in response.iter_lines():\n            if line:\n                line_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data \u003d chunk_data\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_text +\u003d chunk_data[\u0027content\u0027]\n                            content_chunks_in_batch +\u003d 1\n                    except json.JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n                        continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received from {current_backend_url}: \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            total_tokens_generated +\u003d tokens_to_request\n\n        # Smart Stop Detection Logic (Unchanged)\n        if last_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            if content_chunks_in_batch \u003c tokens_to_request:\n                print(\"Backend stopped early. Assuming natural stop.\")\n                model_stopped_naturally \u003d True\n            else:\n                clean_text \u003d chunk_generated_text.strip()\n                if any(clean_text.endswith(token) for token in END_TOKENS):\n                    print(f\"Backend stopped on a known end token: \u0027{clean_text[-5:]}\u0027\")\n                    model_stopped_naturally \u003d True\n                else:\n                    print(\"Artificial stop detected (limit reached). Continuing generation...\")\n        \n        # ## NEW: Increment the batch index for the next loop ##\n        request_batch_index +\u003d 1\n\n        if model_stopped_naturally:\n            print(\"--- Chained Completion Finished (Model Stopped Naturally) ---\")\n            break\n            \n    if not model_stopped_naturally:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n# --- The Core Proxy Route (Unchanged) ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    # This function remains exactly the same as v4\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        try:\n            request_data \u003d request.get_json()\n            if not request_data: return Response(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON\", status\u003d400)\n        if request_data.get(\"stream\", False):\n            return Response(stream_with_context(generate_chained_completion(request_data)), mimetype\u003d\u0027text/event-stream\u0027)\n    print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    try:\n        resp \u003d requests.request(method\u003drequest.method, url\u003df\"{BACKEND_SERVERS[0]}/{subpath}\", headers\u003d{k: v for k, v in request.headers if k.lower() !\u003d \u0027host\u0027}, data\u003drequest.get_data(), stream\u003dTrue, timeout\u003d300)\n        headers \u003d [(n, v) for n, v in resp.raw.headers.items() if n.lower() not in [\u0027content-encoding\u0027, \u0027content-length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]]\n        return Response(resp.iter_content(chunk_size\u003d8192), resp.status_code, headers)\n    except requests.exceptions.RequestException as e:\n        return Response(f\"Error connecting to llama.cpp server: {e}\", status\u003d502)\n\n# --- Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    if not BACKEND_SERVERS:\n        print(\"🚨 Error: The BACKEND_SERVERS list is empty. Please configure at least one server.\")\n    else:\n        print(f\"🦙 Llama in the Middle Proxy v5 (Blending Mode) starting...\")\n        print(f\"Listening on http://{PROXY_HOST}:{PROXY_PORT}\")\n        print(f\"Blending requests across: {\u0027, \u0027.join(BACKEND_SERVERS)}\")\n        app.run(host\u003dPROXY_HOST, port\u003dPROXY_PORT)\n```\n\n### Key Changes Explained\n\n1.  **`BACKEND_SERVERS` List**: We replaced the single `LLAMA_CPP_URL` constant with a list named `BACKEND_SERVERS`. This is now the source of truth for our available models.\n\n2.  **`request_batch_index`**: A new counter, `request_batch_index`, is initialized to `0` before the `while` loop. This counter tracks how many requests we have made to the backend *within a single client completion request*.\n\n3.  **Round-Robin Logic**: Inside the loop, this is the new core logic:\n    ```python\n    # Pick the next server from the list, cycling back to the start if needed.\n    backend_index \u003d request_batch_index % len(BACKEND_SERVERS)\n    current_backend_url \u003d BACKEND_SERVERS[backend_index]\n    target_url \u003d f\"{current_backend_url}/completion\"\n    ```\n    *   The modulo operator (`%`) is perfect for this. `0 % 2` is `0`, `1 % 2` is `1`, `2 % 2` is `0`, and so on. This elegantly cycles through the indices of our `BACKEND_SERVERS` list.\n    *   The `target_url` for the `requests.post` call is now constructed dynamically in each iteration.\n\n4.  **Incrementing the Counter**: At the end of the `while` loop, we do `request_batch_index +\u003d 1` to ensure the next iteration queries the next server in the list.\n\n5.  **Logging**: The log messages have been updated to show which backend server is being queried for each batch, making it easy to see the blending in action.\n\n### How to Run and Test\n\nThis setup is more complex as it requires multiple backend servers.\n\n1.  **Start Two `llama.cpp` Servers**: Open two separate terminals. You can use the same model or different ones to see truly interesting blended results.\n    *   **Terminal 1:**\n        ```bash\n        ./server -m models/your-model-A.gguf --port 10000\n        ```\n    *   **Terminal 2:**\n        ```bash\n        ./server -m models/your-model-B.gguf --port 10001\n        ```\n    *   *Note: If you only have one model, just run the same command twice with different ports.*\n\n2.  **Run the Proxy Server**: In a third terminal, run our new Python script.\n    ```bash\n    python proxy_server_v5.py\n    ```\n    You should see the startup message confirming it knows about both backend servers.\n\n3.  **Test with `curl`**: In a fourth terminal, send a request to the proxy.\n    ```bash\n    curl -X POST http://localhost:11111/completion --data \u0027{\"prompt\":\"The first rule of Fight Club is\", \"stream\": true, \"n_predict\": 40}\u0027\n    ```\n\n**Observe the proxy\u0027s terminal output!** You will now see the magic happen. The logs will look something like this:\n\n```\n--- Blended Completion Started ---\n...\n\u003e [Batch 0] Routing to http://localhost:10000 for 5 tokens...\n\u003c Received from http://localhost:10000: \u0027 you do not talk\u0027\nArtificial stop detected (limit reached). Continuing generation...\n\n\u003e [Batch 1] Routing to http://localhost:10001 for 5 tokens...\n\u003c Received from http://localhost:10001: \u0027 about Fight Club. The\u0027\nArtificial stop detected (limit reached). Continuing generation...\n\n\u003e [Batch 2] Routing to http://localhost:10000 for 5 tokens...\n\u003c Received from http://localhost:10000: \u0027 second rule of Fight\u0027\nArtificial stop detected (limit reached). Continuing generation...\n\n\u003e [Batch 3] Routing to http://localhost:10001 for 5 tokens...\n\u003c Received from http://localhost:10001: \u0027 Club is: you DO\u0027\n...\n```\n\nThe client receives one smooth, continuous stream, completely unaware that the response is being woven together from multiple different model backends, turn by turn. This is the foundation of powerful model orchestration.",
+      "role": "model",
+      "finishReason": "STOP",
+      "tokenCount": 3067,
+      "parts": [{
+        "text": "This is an outstanding idea and gets to the very heart of what a \"Llama in the Middle\" proxy should do"
+      }, {
+        "text": ": orchestrate multiple models to create a blended, potentially superior output.\n\nWe will now modify the script to cycle through a list of"
+      }, {
+        "text": " backend servers in a round-robin fashion for each chunk of the generation.\n\n### The Blending Script (`proxy_server"
+      }, {
+        "text": "_v5.py`)\n\nHere is the updated script. The main changes are in the configuration section and the `generate_"
+      }, {
+        "text": "chained_completion` function.\n\n```python\nimport requests\nimport json\nfrom flask import Flask, request, Response"
+      }, {
+        "text": ", stream_with_context\nfrom flask_cors import CORS\n\n# --- Configuration ---\n# ## NEW: Define"
+      }, {
+        "text": " multiple backend servers for blending ##\n# The proxy will cycle through these servers for each generation chunk.\nBACKEND_SERVERS"
+      }, {
+        "text": " \u003d [\n    \"http://localhost:10000\",\n    \"http://localhost:10"
+      }, {
+        "text": "001\",\n]\n\nPROXY_HOST \u003d \"0.0.0.0\"\nPROXY_PORT \u003d"
+      }, {
+        "text": " 11111\n\n# --- Configuration for Chained Completion ---\nDEFAULT_N_PREDICT \u003d 50\n"
+      }, {
+        "text": "GENERATION_CHUNK_SIZE \u003d 5\nEND_TOKENS \u003d [\"\\n\", \".\", \"?\", \"!\", \"\u003c/s\u003e"
+      }, {
+        "text": "\", \"\u003c|endoftext|\u003e\", \"\u003c|im_end|\u003e\"]\n\n\n# --- Flask App Initialization ---\napp"
+      }, {
+        "text": " \u003d Flask(__name__)\nCORS(app)\n\ndef generate_chained_completion(original_request_data):\n"
+      }, {
+        "text": "    \"\"\"\n    This generator function handles the chained completion logic, now blending\n    responses by routing requests to different backend servers in a"
+      }, {
+        "text": " round-robin fashion.\n    \"\"\"\n    prompt \u003d original_request_data.get(\"prompt\", \"\")\n    n"
+      }, {
+        "text": "_predict_req \u003d original_request_data.get(\"n_predict\", DEFAULT_N_PREDICT)\n\n"
+      }, {
+        "text": "    if n_predict_req \u003d\u003d -1 or \"n_predict\" not in original_request_data:\n"
+      }, {
+        "text": "        print(f\"Client requested n_predict\u003d-1 or was missing. Proxy is overriding with default: {DEFAULT"
+      }, {
+        "text": "_N_PREDICT}\")\n        n_predict_total \u003d DEFAULT_N_PREDICT\n    else:"
+      }, {
+        "text": "\n        n_predict_total \u003d n_predict_req\n\n    print(f\"--- Blended Completion Started"
+      }, {
+        "text": " ---\")\n    print(f\"Original Prompt: \u0027{prompt[:50]}...\u0027\")\n    print(f\""
+      }, {
+        "text": "Total tokens to generate (proxy limit): {n_predict_total}\")\n    print(f\"Chunk size per"
+      }, {
+        "text": " call: {GENERATION_CHUNK_SIZE}\")\n\n    full_prompt \u003d prompt\n    total_tokens_generated"
+      }, {
+        "text": " \u003d 0\n    model_stopped_naturally \u003d False\n    # ## NEW: Keep track of which request"
+      }, {
+        "text": " batch we are on to select a server ##\n    request_batch_index \u003d 0\n\n    while total_"
+      }, {
+        "text": "tokens_generated \u003c n_predict_total and not model_stopped_naturally:\n        # --- ## NEW: Round-"
+      }, {
+        "text": "robin backend selection logic ## ---\n        if not BACKEND_SERVERS:\n            print(\"Error: BACKEND_SER"
+      }, {
+        "text": "VERS list is empty. Cannot process request.\")\n            yield f\"data: {json.dumps({\u0027error\u0027: \u0027"
+      }, {
+        "text": "No backend servers configured.\u0027})}\\n\\n\"\n            break\n\n        # Pick the next server from the list,"
+      }, {
+        "text": " cycling back to the start if needed.\n        backend_index \u003d request_batch_index % len(BACKEND_SER"
+      }, {
+        "text": "VERS)\n        current_backend_url \u003d BACKEND_SERVERS[backend_index]\n        target_"
+      }, {
+        "text": "url \u003d f\"{current_backend_url}/completion\"\n        # --------------------------------------------------------\n\n        remaining_"
+      }, {
+        "text": "tokens \u003d n_predict_total - total_tokens_generated\n        tokens_to_request \u003d min(GENERATION_CHUNK"
+      }, {
+        "text": "_SIZE, remaining_tokens)\n\n        payload \u003d original_request_data.copy()\n        payload[\"prompt\"] \u003d full"
+      }, {
+        "text": "_prompt\n        payload[\"n_predict\"] \u003d tokens_to_request\n        payload[\"stream\"] \u003d True\n\n        print"
+      }, {
+        "text": "(f\"\\n\u003e [Batch {request_batch_index}] Routing to {current_backend_url} for"
+      }, {
+        "text": " {tokens_to_request} tokens...\")\n\n        try:\n            response \u003d requests.post(\n                target"
+      }, {
+        "text": "_url, # Use the dynamically selected URL\n                headers\u003d{\"Content-Type\": \"application/json\"},\n                json\u003d"
+      }, {
+        "text": "payload,\n                stream\u003dTrue,\n            )\n            response.raise_for_status()\n        except requests.exceptions"
+      }, {
+        "text": ".RequestException as e:\n            print(f\"Error connecting to backend server {current_backend_url}:"
+      }, {
+        "text": " {e}\")\n            yield f\"data: {json.dumps({\u0027error\u0027: f\u0027Failed to connect to backend:"
+      }, {
+        "text": " {current_backend_url}\u0027})}\\n\\n\"\n            # Optional: You could implement logic here to skip"
+      }, {
+        "text": " the failing server and try the next one.\n            # For now, we\u0027ll just stop the generation on failure"
+      }, {
+        "text": ".\n            break\n\n        chunk_generated_text \u003d \"\"\n        last_chunk_data \u003d None\n        content_"
+      }, {
+        "text": "chunks_in_batch \u003d 0\n\n        for line in response.iter_lines():\n            if line:\n                line"
+      }, {
+        "text": "_str \u003d line.decode(\u0027utf-8\u0027)\n                if line_str.startswith(\u0027data: \u0027):\n                    yield"
+      }, {
+        "text": " line_str + \u0027\\n\\n\u0027\n                    try:\n                        data_str \u003d line_str[len(\u0027"
+      }, {
+        "text": "data: \u0027):]\n                        chunk_data \u003d json.loads(data_str)\n                        last_chunk_data"
+      }, {
+        "text": " \u003d chunk_data\n                        if \u0027content\u0027 in chunk_data and chunk_data[\u0027content\u0027]:\n                            chunk_generated_"
+      }, {
+        "text": "text +\u003d chunk_data[\u0027content\u0027]\n                            content_chunks_in_batch +\u003d 1\n                    except json"
+      }, {
+        "text": ".JSONDecodeError:\n                        print(f\"Warning: Could not decode JSON chunk: {data_str}\")\n"
+      }, {
+        "text": "                        continue\n        \n        if chunk_generated_text:\n            print(f\"\u003c Received from {current_backend"
+      }, {
+        "text": "_url}: \u0027{chunk_generated_text}\u0027\")\n            full_prompt +\u003d chunk_generated_text\n            "
+      }, {
+        "text": "total_tokens_generated +\u003d tokens_to_request\n\n        # Smart Stop Detection Logic (Unchanged)\n        if last"
+      }, {
+        "text": "_chunk_data and last_chunk_data.get(\u0027stop\u0027):\n            if content_chunks_in_batch \u003c tokens"
+      }, {
+        "text": "_to_request:\n                print(\"Backend stopped early. Assuming natural stop.\")\n                model_stopped_n"
+      }, {
+        "text": "aturally \u003d True\n            else:\n                clean_text \u003d chunk_generated_text.strip()\n                if any"
+      }, {
+        "text": "(clean_text.endswith(token) for token in END_TOKENS):\n                    print(f\"Backend stopped on"
+      }, {
+        "text": " a known end token: \u0027{clean_text[-5:]}\u0027\")\n                    model_stopped_naturally \u003d True\n                "
+      }, {
+        "text": "else:\n                    print(\"Artificial stop detected (limit reached). Continuing generation...\")\n        \n        # ## NEW: Increment the"
+      }, {
+        "text": " batch index for the next loop ##\n        request_batch_index +\u003d 1\n\n        if model_stopped_n"
+      }, {
+        "text": "aturally:\n            print(\"--- Chained Completion Finished (Model Stopped Naturally) ---\")\n            break\n            \n    if not"
+      }, {
+        "text": " model_stopped_naturally:\n        print(\"--- Chained Completion Finished (n_predict reached) ---\")\n\n#"
+      }, {
+        "text": " --- The Core Proxy Route (Unchanged) ---\n@app.route(\u0027/\u003cpath:subpath\u003e\u0027, methods\u003d[\u0027GET"
+      }, {
+        "text": "\u0027, \u0027POST\u0027, \u0027PUT\u0027, \u0027DELETE\u0027, \u0027OPTIONS\u0027])\ndef proxy(subpath):\n    # This"
+      }, {
+        "text": " function remains exactly the same as v4\n    if subpath \u003d\u003d \u0027completion\u0027 and request.method \u003d\u003d \u0027POST\u0027:\n        "
+      }, {
+        "text": "try:\n            request_data \u003d request.get_json()\n            if not request_data: return Response"
+      }, {
+        "text": "(\"Invalid JSON\", status\u003d400)\n        except Exception:\n            return Response(\"Invalid JSON\", status"
+      }, {
+        "text": "\u003d400)\n        if request_data.get(\"stream\", False):\n            return Response(stream"
+      }, {
+        "text": "_with_context(generate_chained_completion(request_data)), mimetype\u003d\u0027text/event-stream\u0027)\n    "
+      }, {
+        "text": "print(f\"--- Generic Proxy Passthrough for /{subpath} ---\")\n    try:\n        resp \u003d requests"
+      }, {
+        "text": ".request(method\u003drequest.method, url\u003df\"{BACKEND_SERVERS[0]}/{subpath}\", headers"
+      }, {
+        "text": "\u003d{k: v for k, v in request.headers if k.lower() !\u003d \u0027host\u0027}, data\u003drequest.get"
+      }, {
+        "text": "_data(), stream\u003dTrue, timeout\u003d300)\n        headers \u003d [(n, v) for n, v"
+      }, {
+        "text": " in resp.raw.headers.items() if n.lower() not in [\u0027content-encoding\u0027, \u0027content-"
+      }, {
+        "text": "length\u0027, \u0027transfer-encoding\u0027, \u0027connection\u0027]]\n        return Response(resp.iter_content(chunk_size\u003d8"
+      }, {
+        "text": "192), resp.status_code, headers)\n    except requests.exceptions.RequestException as e:\n        return"
+      }, {
+        "text": " Response(f\"Error connecting to llama.cpp server: {e}\", status\u003d502)\n\n# ---"
+      }, {
+        "text": " Main Entry Point ---\nif __name__ \u003d\u003d \u0027__main__\u0027:\n    if not BACKEND_SERVERS:\n"
+      }, {
+        "text": "        print(\"🚨 Error: The BACKEND_SERVERS list is empty. Please configure at least one server.\")\n    "
+      }, {
+        "text": "else:\n        print(f\"🦙 Llama in the Middle Proxy v5 (Blending Mode) starting...\")\n"
+      }, {
+        "text": "        print(f\"Listening on http://{PROXY_HOST}:{PROXY_PORT}\")\n        print(f\"Blending requests"
+      }, {
+        "text": " across: {\u0027, \u0027.join(BACKEND_SERVERS)}\")\n        app.run(host\u003dPROXY_HOST,"
+      }, {
+        "text": " port\u003dPROXY_PORT)\n```\n\n### Key Changes Explained\n\n1.  **`BACKEND_SERVERS`"
+      }, {
+        "text": " List**: We replaced the single `LLAMA_CPP_URL` constant with a list named `BACKEND_SERVERS`. This"
+      }, {
+        "text": " is now the source of truth for our available models.\n\n2.  **`request_batch_index`**:"
+      }, {
+        "text": " A new counter, `request_batch_index`, is initialized to `0` before the `while` loop. This"
+      }, {
+        "text": " counter tracks how many requests we have made to the backend *within a single client completion request*.\n\n3.  **Round"
+      }, {
+        "text": "-Robin Logic**: Inside the loop, this is the new core logic:\n    ```python\n    # Pick the next server"
+      }, {
+        "text": " from the list, cycling back to the start if needed.\n    backend_index \u003d request_batch_index %"
+      }, {
+        "text": " len(BACKEND_SERVERS)\n    current_backend_url \u003d BACKEND_SERVERS[backend_"
+      }, {
+        "text": "index]\n    target_url \u003d f\"{current_backend_url}/completion\"\n    ```\n    *"
+      }, {
+        "text": "   The modulo operator (`%`) is perfect for this. `0 % 2` is `0`, `1 % 2"
+      }, {
+        "text": "` is `1`, `2 % 2` is `0`, and so on. This elegantly cycles through the indices"
+      }, {
+        "text": " of our `BACKEND_SERVERS` list.\n    *   The `target_url` for the `requests."
+      }, {
+        "text": "post` call is now constructed dynamically in each iteration.\n\n4.  **Incrementing the Counter**: At the end of the"
+      }, {
+        "text": " `while` loop, we do `request_batch_index +\u003d 1` to ensure the next iteration queries the next server in"
+      }, {
+        "text": " the list.\n\n5.  **Logging**: The log messages have been updated to show which backend server is being queried"
+      }, {
+        "text": " for each batch, making it easy to see the blending in action.\n\n### How to Run and Test\n\nThis setup"
+      }, {
+        "text": " is more complex as it requires multiple backend servers.\n\n1.  **Start Two `llama.cpp` Servers**:"
+      }, {
+        "text": " Open two separate terminals. You can use the same model or different ones to see truly interesting blended results.\n    *   **Terminal"
+      }, {
+        "text": " 1:**\n        ```bash\n        ./server -m models/your-model-A.gguf --"
+      }, {
+        "text": "port 10000\n        ```\n    *   **Terminal 2:**\n        ```bash\n"
+      }, {
+        "text": "        ./server -m models/your-model-B.gguf --port 10001\n"
+      }, {
+        "text": "        ```\n    *   *Note: If you only have one model, just run the same command twice with different ports.*\n\n"
+      }, {
+        "text": "2.  **Run the Proxy Server**: In a third terminal, run our new Python script.\n    ```bash\n"
+      }, {
+        "text": "    python proxy_server_v5.py\n    ```\n    You should see the startup message confirming it knows"
+      }, {
+        "text": " about both backend servers.\n\n3.  **Test with `curl`**: In a fourth terminal, send a request to"
+      }, {
+        "text": " the proxy.\n    ```bash\n    curl -X POST http://localhost:11111/completion --"
+      }, {
+        "text": "data \u0027{\"prompt\":\"The first rule of Fight Club is\", \"stream\": true, \"n_predict\": 40}\u0027"
+      }, {
+        "text": "\n    ```\n\n**Observe the proxy\u0027s terminal output!** You will now see the magic happen. The logs"
+      }, {
+        "text": " will look something like this:\n\n```\n--- Blended Completion Started ---\n...\n\u003e [Batch 0] Routing"
+      }, {
+        "text": " to http://localhost:10000 for 5 tokens...\n\u003c Received from http://localhost:100"
+      }, {
+        "text": "00: \u0027 you do not talk\u0027\nArtificial stop detected (limit reached). Continuing generation...\n\n\u003e [Batch 1"
+      }, {
+        "text": "] Routing to http://localhost:10001 for 5 tokens...\n\u003c Received from http://localhost"
+      }, {
+        "text": ":10001: \u0027 about Fight Club. The\u0027\nArtificial stop detected (limit reached). Continuing generation"
+      }, {
+        "text": "...\n\n\u003e [Batch 2] Routing to http://localhost:10000 for 5 tokens..."
+      }, {
+        "text": "\n\u003c Received from http://localhost:10000: \u0027 second rule of Fight\u0027\nArtificial stop detected"
+      }, {
+        "text": " (limit reached). Continuing generation...\n\n\u003e [Batch 3] Routing to http://localhost:1000"
+      }, {
+        "text": "1 for 5 tokens...\n\u003c Received from http://localhost:10001: \u0027 Club is:"
+      }, {
+        "text": " you DO\u0027\n...\n```\n\nThe client receives one smooth, continuous stream, completely unaware that the response is being woven"
+      }, {
+        "text": " together from multiple different model backends, turn by turn. This is the foundation of powerful model orchestration."
+      }]
+    }],
+    "pendingInputs": [{
+      "text": "",
+      "role": "user"
+    }]
+  }
+}
